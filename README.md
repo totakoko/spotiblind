@@ -27,3 +27,9 @@ yarn lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### Spotify Web API
+
+https://developer.spotify.com/documentation/web-api/
+
+https://developer.spotify.com/documentation/general/guides/authorization-guide/
