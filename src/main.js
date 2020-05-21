@@ -10,6 +10,8 @@ import SpotifyPlugin from './plugins/spotifyPlugin'
 
 Vue.config.productionTip = false
 
+config.redirectURI = `${location.origin}/login`
+
 ;(async () => {
   const spotifyClient = new SpotifyClient(config)
   await spotifyClient.init()
