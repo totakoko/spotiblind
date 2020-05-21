@@ -40,7 +40,7 @@ build-docker:
   only:
     - master
 
-deploy-prod:
+deploy:
   stage: deploy
   image:
     name: totakoko/compose-deploy
