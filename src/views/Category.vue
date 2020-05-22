@@ -1,20 +1,17 @@
 <template>
-  <div class="library">
-    <v-btn
-      class="blindtest__back-to-playlists-btn"
-      to="/"
-    >
-      Categories
-    </v-btn>
-    <v-btn
-      v-for="playlist in playlists"
-      :key="playlist.id"
-      class="library__category-btn"
-      :style="{backgroundImage: `url(${playlist.image})`}"
-      :to="`/playlists/${playlist.id}`"
-    >
-      {{ playlist.name }}
-    </v-btn>
+  <div v-if="loaded">
+    <v-breadcrumbs :items="breadcrumbs" />
+    <div class="library">
+      <v-btn
+        v-for="playlist in playlists"
+        :key="playlist.id"
+        class="library__category-btn"
+        :style="{backgroundImage: `url(${playlist.image})`}"
+        :to="`/categories/${categoryId}/playlists/${playlist.id}`"
+      >
+        {{ playlist.name }}
+      </v-btn>
+    </div>
   </div>
 </template>
 
@@ -27,10 +24,32 @@ export default {
     }
   },
   data: () => ({
+    loaded: false,
+    category: null,
     playlists: []
   }),
+  computed: {
+    breadcrumbs () {
+      return [
+        {
+          text: 'Categories',
+          to: '/'
+        },
+        {
+          text: this.category.name,
+          to: `/categories/${this.categoryId}`
+        }
+      ]
+    }
+  },
   async created () {
-    this.playlists = await this.$spotifyClient.getCategoryPlaylists(this.categoryId)
+    const [category, playlists] = await Promise.all([
+      this.$spotifyClient.getCategory(this.categoryId),
+      this.$spotifyClient.getCategoryPlaylists(this.categoryId)
+    ])
+    this.category = category
+    this.playlists = playlists
+    this.loaded = true
   }
 }
 </script>

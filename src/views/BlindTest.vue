@@ -1,38 +1,31 @@
 <template>
-  <div>
-    <v-btn
-      class="blindtest__back-to-playlists-btn"
-      to="/"
+  <div v-if="loaded">
+    <v-breadcrumbs :items="breadcrumbs" />
+
+    <img :src="playlist.image">
+    <h1>{{ playlist.name }}</h1>
+
+    <v-progress-linear
+      v-model="waitProgress"
+      class="blindtest__progress"
+      color="indigo darken-1"
+      height="10"
+    />
+    <div
+      v-for="(track, index) in pastTracks"
+      :key="index"
+      class="blindtest__track"
     >
-      Playlists
+      {{ track.author }} : {{ track.name }}
+    </div>
+
+    <v-btn
+      v-if="finished"
+      class="mt-3"
+      @click="restart()"
+    >
+      Start a new blindtest
     </v-btn>
-
-    <template v-if="playlist">
-      <img :src="playlist.image">
-      <h1>{{ playlist.name }}</h1>
-
-      <v-progress-linear
-        v-model="waitProgress"
-        class="blindtest__progress"
-        color="indigo darken-1"
-        height="10"
-      />
-      <div
-        v-for="(track, index) in pastTracks"
-        :key="index"
-        class="blindtest__track"
-      >
-        {{ track.author }} : {{ track.name }}
-      </div>
-
-      <v-btn
-        v-if="finished"
-        class="mt-3"
-        @click="restart()"
-      >
-        Start a new blindtest
-      </v-btn>
-    </template>
   </div>
 </template>
 
@@ -47,23 +40,72 @@ const numberOfTracks = 10
 
 export default {
   props: {
+    categoryId: {
+      type: String,
+      required: true
+    },
     playlistId: {
       type: String,
       required: true
     }
   },
   data: () => ({
+    loaded: false,
     playlist: null,
-    tracks: [],
+    category: null,
     pastTracks: [],
     currentTrack: 0,
     waitProgress: 0,
     finished: false,
     abort: false
   }),
+  computed: {
+    breadcrumbs () {
+      return [
+        {
+          text: 'Categories',
+          to: '/'
+        },
+        {
+          text: this.category.name,
+          to: `/categories/${this.categoryId}` // BUG WITH _ CHARACTER MAKES NOT CLICKABLE
+        },
+        {
+          text: this.playlist.name,
+          to: `/categories/${this.categoryId}/playlists/${this.playlistId}`
+        }
+      ]
+    }
+  },
   async created () {
     if (await this.assertDevicesConnected()) {
-      await this.startBlindTest(this.playlistId)
+      await Promise.all([
+        (async () => {
+          this.category = await this.$spotifyClient.getCategory(this.categoryId)
+        })(),
+        (async () => {
+          const playlist = await this.$spotifyClient.getPlaylist(this.playlistId)
+          this.playlist = {
+            name: playlist.name,
+            image: playlist.images[0].url,
+            tracks: playlist.tracks.items.map(track => {
+              return {
+                id: track.track.id,
+                name: track.track.name,
+                author: track.track.artists[0].name,
+                duration: track.track.duration_ms
+              }
+            })
+          }
+        })()
+      ])
+      this.loaded = true
+
+      this.startBlindTest(
+        this.playlist.tracks
+          .sort((a, b) => 0.5 - Math.random())
+          .slice(0, numberOfTracks)
+      )
     }
   },
   destroyed () {
@@ -90,24 +132,9 @@ export default {
         return false
       }
     },
-    async startBlindTest (playlistId) {
+    async startBlindTest () {
       this.finished = false
       this.pastTracks = []
-      const playlist = await this.$spotifyClient.getPlaylist(playlistId)
-      this.playlist = {
-        name: playlist.name,
-        image: playlist.images[0].url,
-        tracks: playlist.tracks.items.map(track => {
-          return {
-            id: track.track.id,
-            name: track.track.name,
-            author: track.track.artists[0].name,
-            duration: track.track.duration_ms
-          }
-        })
-          .sort((a, b) => 0.5 - Math.random())
-          .slice(0, numberOfTracks)
-      }
 
       this.currentTrack = 0
       while (this.currentTrack < this.playlist.tracks.length) {
@@ -154,7 +181,11 @@ export default {
       this.finished = true
     },
     restart () {
-      this.startBlindTest(this.playlistId)
+      this.startBlindTest(
+        this.playlist.tracks
+          .sort((a, b) => 0.5 - Math.random())
+          .slice(0, numberOfTracks)
+      )
     }
   }
 

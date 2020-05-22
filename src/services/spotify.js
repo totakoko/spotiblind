@@ -150,6 +150,14 @@ export class SpotifyClient {
     })
   }
 
+  async getCategory (categoryId) {
+    const res = await fetch(`https://api.spotify.com/v1/browse/categories/${categoryId}`, {
+      headers: this.getAuthHeaders()
+    })
+    this.ensureValidResponse(res)
+    return await res.json()
+  }
+
   async getCategoryPlaylists (categoryId) {
     const res = await fetch(`https://api.spotify.com/v1/browse/categories/${categoryId}/playlists?limit=50`, {
       headers: this.getAuthHeaders()

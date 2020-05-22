@@ -32,7 +32,7 @@ const routes = [
         props: true
       },
       {
-        path: '/playlists/:playlistId',
+        path: '/categories/:categoryId/playlists/:playlistId',
         name: 'BlindTest',
         component: BlindTest,
         props: true
