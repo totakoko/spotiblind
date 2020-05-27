@@ -129,19 +129,12 @@ export class SpotifyClient {
   }
 
   async getPlaylist (playlistID) {
-    const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}`, {
-      headers: this.getAuthHeaders()
-    })
-    this.ensureValidResponse(res)
-    return await res.json()
+    return this.fetchAllItems(`https://api.spotify.com/v1/playlists/${playlistID}?`, 'tracks', 100)
   }
 
   async getCategories () {
-    const res = await fetch('https://api.spotify.com/v1/browse/categories?locale=fr&limit=50', {
-      headers: this.getAuthHeaders()
-    })
-    this.ensureValidResponse(res)
-    return (await res.json()).categories.items.map(category => {
+    const body = await this.fetchAllItems('https://api.spotify.com/v1/browse/categories?locale=fr', 'categories', 50)
+    return body.categories.items.map(category => {
       return {
         id: category.id,
         name: category.name,
@@ -151,7 +144,7 @@ export class SpotifyClient {
   }
 
   async getCategory (categoryId) {
-    const res = await fetch(`https://api.spotify.com/v1/browse/categories/${categoryId}`, {
+    const res = await fetch(`https://api.spotify.com/v1/browse/categories/${categoryId}?locale=fr`, {
       headers: this.getAuthHeaders()
     })
     this.ensureValidResponse(res)
@@ -159,11 +152,8 @@ export class SpotifyClient {
   }
 
   async getCategoryPlaylists (categoryId) {
-    const res = await fetch(`https://api.spotify.com/v1/browse/categories/${categoryId}/playlists?limit=50`, {
-      headers: this.getAuthHeaders()
-    })
-    this.ensureValidResponse(res)
-    return (await res.json()).playlists.items.map(playlist => {
+    const body = await this.fetchAllItems(`https://api.spotify.com/v1/browse/categories/${categoryId}/playlists?country=fr`, 'playlists', 50)
+    return body.playlists.items.map(playlist => {
       return {
         id: playlist.id,
         name: playlist.name,
@@ -210,6 +200,31 @@ export class SpotifyClient {
       method: 'PUT'
     })
     this.ensureValidResponse(res)
+  }
+
+  async fetchAllItems (url, collectionKey, limit) {
+    const res = await fetch(`${url}&limit=${limit}`, {
+      headers: this.getAuthHeaders()
+    })
+    this.ensureValidResponse(res)
+    const body = await res.json()
+    const collection = body[collectionKey]
+    if (collection.total > limit) {
+      const additionalPagesCount = Math.ceil((collection.total - limit) / limit)
+      const additionalBodies = await Promise.all(
+        Array(additionalPagesCount).fill(0).map(async (_, index) => {
+          const res = await fetch(`${url}&limit=${limit}&offset=${(index + 1) * limit}`, {
+            headers: this.getAuthHeaders()
+          })
+          this.ensureValidResponse(res)
+          return await res.json()
+        })
+      )
+      additionalBodies.forEach(body => {
+        collection.items.push(...body[collectionKey].items)
+      })
+    }
+    return body
   }
 
   // private
