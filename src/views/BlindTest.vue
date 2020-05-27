@@ -68,7 +68,8 @@ export default {
         },
         {
           text: this.category.name,
-          to: `/categories/${this.categoryId}` // BUG WITH _ CHARACTER MAKES NOT CLICKABLE
+          to: `/categories/${this.categoryId}`,
+          exact: true
         },
         {
           text: this.playlist.name,
