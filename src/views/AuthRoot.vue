@@ -52,10 +52,12 @@ export default {
   right: 1vw
 
 .no-devices-found-banner
-  background-color: red
+  background-color: #ff3f3f
   position: absolute
   top: 0
   left: 0
   right: 0
   text-align: center
+  color: white
+  padding: .5em 0
 </style>
