@@ -60,7 +60,7 @@ export default {
 <style lang="sass">
 .no-devices-found-banner
   background-color: #ff3f3f
-  position: absolute
+  position: fixed
   bottom: 0
   left: 0
   right: 0
