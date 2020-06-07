@@ -1,5 +1,8 @@
 <template>
-  <v-btn @click="$spotifyClient.redirectToSpotifyLogin()">
+  <v-btn
+    class="login-btn"
+    @click="$spotifyClient.redirectToSpotifyLogin()"
+  >
     <v-icon
       color="#84BD00"
       left
@@ -19,3 +22,12 @@ export default {
   }
 }
 </script>
+
+<style lang="sass">
+.login-btn
+  position: absolute
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+  max-width: 300px
+</style>

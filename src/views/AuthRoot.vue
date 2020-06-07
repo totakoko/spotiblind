@@ -1,18 +1,30 @@
 <template>
-  <div>
-    <v-btn
-      class="logout-btn"
-      @click="logout()"
+  <div style="width: 100%">
+    <v-app-bar
+      color="deep-purple accent-2"
+      dense
+      dark
     >
-      Logout
-    </v-btn>
+      <v-toolbar-title>Spotiblind</v-toolbar-title>
+
+      <v-spacer />
+
+      <v-btn
+        icon
+        @click="logout()"
+      >
+        <v-icon>mdi-logout</v-icon>
+      </v-btn>
+    </v-app-bar>
+
+    <router-view />
+
     <div
       v-if="noDevicesFound"
       class="no-devices-found-banner"
     >
       No Spotify devices found!
     </div>
-    <router-view />
   </div>
 </template>
 
@@ -46,15 +58,10 @@ export default {
 </script>
 
 <style lang="sass">
-.logout-btn
-  position: absolute !important
-  top: 2vh
-  right: 1vw
-
 .no-devices-found-banner
   background-color: #ff3f3f
   position: absolute
-  top: 0
+  bottom: 0
   left: 0
   right: 0
   text-align: center

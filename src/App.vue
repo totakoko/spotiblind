@@ -1,8 +1,6 @@
 <template>
   <v-app>
-    <div class="blindtest">
-      <router-view />
-    </div>
+    <router-view />
   </v-app>
 </template>
 
@@ -10,12 +8,4 @@
 html,
 body
   height: 100vh
-
-.blindtest
-  height: 100%
-  display: flex
-  flex-direction: column
-  justify-content: center
-  align-items: center
-  padding: 10vw
 </style>
