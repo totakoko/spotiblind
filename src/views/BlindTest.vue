@@ -1,16 +1,21 @@
 <template>
-  <div v-if="loaded">
+  <div
+    v-if="loaded"
+    class="blindtest"
+  >
     <v-breadcrumbs :items="breadcrumbs" />
 
     <img :src="playlist.image">
     <h1>{{ playlist.name }}</h1>
 
-    <v-progress-linear
-      v-model="waitProgress"
-      class="blindtest__progress"
-      color="indigo darken-1"
-      height="10"
-    />
+    <div class="blindtest__progress">
+      <v-progress-linear
+        v-model="waitProgress"
+        color="indigo darken-1"
+        height="10"
+      />
+    </div>
+
     <div
       v-for="(track, index) in pastTracks"
       :key="index"
@@ -194,15 +199,20 @@ export default {
 </script>
 
 <style lang="sass">
-
 .blindtest
+  display: flex
+  flex-direction: column
+  align-items: center
+
   &__back-to-playlists-btn
     position: absolute !important
     top: 5vh
     right: 1vw
 
   &__progress
-    margin: 2em
+    padding: 2em
+    width: 100%
+    max-width: 800px
     transition: .1s linear !important
 
   &__track

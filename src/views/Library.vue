@@ -19,6 +19,11 @@ export default {
   }),
   async created () {
     this.categories = await this.$spotifyClient.getCategories()
+    this.categories.forEach(category => {
+      if (category.name.includes('/')) {
+        category.name = category.name.replace(/\//, ' / ')
+      }
+    })
   }
 }
 </script>
