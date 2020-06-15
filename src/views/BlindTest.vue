@@ -138,12 +138,12 @@ export default {
         return false
       }
     },
-    async startBlindTest () {
+    async startBlindTest (tracks) {
       this.finished = false
       this.pastTracks = []
 
       this.currentTrack = 0
-      while (this.currentTrack < this.playlist.tracks.length) {
+      while (this.currentTrack < tracks.length) {
         const track = this.playlist.tracks[this.currentTrack]
         const startPosition = Math.floor(Math.random() * (track.duration - listenDuration))
         await this.$spotifyClient.play(track.id, startPosition)
