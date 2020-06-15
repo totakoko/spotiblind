@@ -22,6 +22,14 @@
       class="blindtest__track"
     >
       {{ track.author }} : {{ track.name }}
+      <v-btn
+        v-if="finished"
+        icon
+        title="Play this track"
+        @click="playTrack(track.id)"
+      >
+        <v-icon>mdi-play-circle</v-icon>
+      </v-btn>
     </div>
 
     <v-btn
@@ -185,6 +193,9 @@ export default {
         this.currentTrack++
       }
       this.finished = true
+    },
+    async playTrack (trackId) {
+      await this.$spotifyClient.play(trackId)
     },
     restart () {
       this.startBlindTest(
