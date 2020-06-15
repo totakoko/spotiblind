@@ -17,7 +17,6 @@ const routes = [
   },
   {
     path: '/',
-    name: 'AuthRoot',
     component: AuthRoot,
     children: [
       {
