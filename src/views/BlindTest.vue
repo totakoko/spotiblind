@@ -35,7 +35,7 @@
     <v-btn
       v-if="finished"
       class="mt-3"
-      @click="restart()"
+      @click="startRandomBlindTest()"
     >
       Start a new blindtest
     </v-btn>
@@ -46,10 +46,6 @@
 function wait (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
-
-const listenDuration = 20000
-const prepareDuration = 5000
-const numberOfTracks = 10
 
 export default {
   props: {
@@ -115,11 +111,7 @@ export default {
       ])
       this.loaded = true
 
-      this.startBlindTest(
-        this.playlist.tracks
-          .sort((a, b) => 0.5 - Math.random())
-          .slice(0, numberOfTracks)
-      )
+      this.startRandomBlindTest()
     }
   },
   destroyed () {
@@ -146,9 +138,19 @@ export default {
         return false
       }
     },
+    startRandomBlindTest () {
+      this.startBlindTest(
+        this.playlist.tracks
+          .sort((a, b) => 0.5 - Math.random())
+          .slice(0, this.$settings.settings.numberOfTracks)
+      )
+    },
     async startBlindTest (tracks) {
       this.finished = false
       this.pastTracks = []
+
+      const listenDuration = this.$settings.settings.listenDuration * 1000
+      const pauseDuration = this.$settings.settings.pauseDuration * 1000
 
       this.currentTrack = 0
       while (this.currentTrack < tracks.length) {
@@ -181,9 +183,9 @@ export default {
             clearInterval(timer)
             return
           }
-          this.waitProgress = (Date.now() - startTime) * 100 / prepareDuration
+          this.waitProgress = (Date.now() - startTime) * 100 / pauseDuration
         }, 32)
-        await wait(prepareDuration)
+        await wait(pauseDuration)
 
         if (this.abort) {
           return
@@ -196,13 +198,6 @@ export default {
     },
     async playTrack (trackId) {
       await this.$spotifyClient.play(trackId)
-    },
-    restart () {
-      this.startBlindTest(
-        this.playlist.tracks
-          .sort((a, b) => 0.5 - Math.random())
-          .slice(0, numberOfTracks)
-      )
     }
   }
 

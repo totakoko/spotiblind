@@ -6,18 +6,21 @@ import { config } from './config.js'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
 import { SpotifyClient } from './services/spotify'
-import SpotifyPlugin from './plugins/spotifyPlugin'
+import ServicesPlugin from './plugins/services'
+import { SettingsService } from './services/settings'
 
 Vue.config.productionTip = false
 
 config.redirectURI = `${location.origin}/login`
 
 ;(async () => {
+  const settings = new SettingsService()
   const spotifyClient = new SpotifyClient(config)
   await spotifyClient.init()
 
-  Vue.use(SpotifyPlugin, {
-    client: spotifyClient
+  Vue.use(ServicesPlugin, {
+    settings,
+    spotifyClient
   })
   new Vue({
     router,

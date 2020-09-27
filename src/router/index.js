@@ -6,6 +6,7 @@ import AuthRoot from '../views/AuthRoot.vue'
 import Library from '../views/Library.vue'
 import Category from '../views/Category.vue'
 import BlindTest from '../views/BlindTest.vue'
+import Settings from '../views/Settings.vue'
 
 Vue.use(VueRouter)
 
@@ -35,8 +36,19 @@ const routes = [
         name: 'BlindTest',
         component: BlindTest,
         props: true
+      },
+      {
+        path: '/settings',
+        name: 'Settings',
+        component: Settings
       }
     ]
+  },
+
+  // when the page is not found
+  {
+    path: '*',
+    redirect: '/'
   }
 ]
 

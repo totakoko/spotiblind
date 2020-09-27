@@ -5,12 +5,31 @@
       dense
       dark
     >
-      <v-toolbar-title>Spotiblind</v-toolbar-title>
+      <v-btn
+        class="full-height"
+        tile
+        text
+        @click="$router.push('/')"
+      >
+        Spotiblind
+      </v-btn>
 
       <v-spacer />
 
       <v-btn
-        icon
+        class="full-height"
+        tile
+        text
+        title="Settings"
+        @click="$router.push('/settings')"
+      >
+        <v-icon>mdi-settings</v-icon>
+      </v-btn>
+      <v-btn
+        class="full-height"
+        tile
+        text
+        title="Log out"
         @click="logout()"
       >
         <v-icon>mdi-logout</v-icon>
@@ -67,4 +86,7 @@ export default {
   text-align: center
   color: white
   padding: .5em 0
+
+.full-height
+  height: 100%
 </style>
