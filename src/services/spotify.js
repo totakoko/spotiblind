@@ -1,5 +1,6 @@
 const LOCAL_STORAGE_ACCESS_TOKEN_KEY = 'spotiblind-access-token'
 const LOCAL_STORAGE_REFRESH_TOKEN_KEY = 'spotiblind-refresh-token'
+const LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY = 'spotiblind-refresh-token-expiration'
 
 /*
 config
@@ -16,10 +17,12 @@ export class SpotifyClient {
     this.config = config
 
     const accessToken = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY)
+    const accessTokenExpiration = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY)
     const refreshToken = localStorage.getItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY)
     if (accessToken && refreshToken) {
       this.config.accessToken = accessToken
       this.config.refreshToken = refreshToken
+      this.config.accessTokenExpiration = accessTokenExpiration
     }
   }
 
@@ -61,15 +64,19 @@ export class SpotifyClient {
     const body = await res.json()
     this.config.accessToken = body.access_token
     this.config.refreshToken = body.refresh_token
+    this.config.accessTokenExpiration = Math.floor(Date.now() / 1000) + body.expires_in
     localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, this.config.accessToken)
     localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, this.config.refreshToken)
+    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY, Math.floor(Date.now() / 1000) + body.expires_in)
   }
 
   logout () {
     this.config.accessToken = ''
     this.config.refreshToken = ''
+    this.config.accessTokenExpiration = 0
     localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, '')
     localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, '')
+    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY, '')
   }
 
   getAuthHeaders () {
@@ -85,11 +92,15 @@ export class SpotifyClient {
       // validate the access token
       try {
         await this.getUserProfile()
+
+        // set a timer to refresh the access token 10 minutes before expiration
+        const remainingValidity = Math.floor(Date.now() / 1000) - this.config.accessTokenExpiration
+        setTimeout(async () => {
+          await this.refreshAccessToken()
+        }, (remainingValidity - 600) * 1000)
       } catch (error) {
         console.log('could not get user profile', error)
-        const result = await this.refreshAccessToken(this.config.refreshToken)
-        this.config.accessToken = result.access_token
-        localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, this.config.accessToken)
+        await this.refreshAccessToken()
       }
     }
     return false
@@ -99,12 +110,12 @@ export class SpotifyClient {
     return !!this.config.accessToken
   }
 
-  async refreshAccessToken (refreshToken) {
+  async refreshAccessToken () {
     const searchParams = Object.entries({
       client_id: this.config.clientId,
       client_secret: this.config.clientSecret,
       grant_type: 'refresh_token',
-      refresh_token: refreshToken
+      refresh_token: this.config.refreshToken
     })
       .map(([key, value]) => {
         return encodeURIComponent(key) + '=' + encodeURIComponent(value)
@@ -117,7 +128,17 @@ export class SpotifyClient {
       body: searchParams
     })
     this.ensureValidResponse(res)
-    return await res.json()
+    const result = await res.json()
+
+    this.config.accessToken = result.access_token
+    this.config.accessTokenExpiration = Math.floor(Date.now() / 1000) + result.expires_in
+    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, this.config.accessToken)
+    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY, this.config.accessTokenExpiration)
+
+    // refresh the access token 10 minutes before expiration
+    setTimeout(async () => {
+      await this.refreshAccessToken()
+    }, (result.expires_in - 600) * 1000)
   }
 
   async getUserProfile () {
