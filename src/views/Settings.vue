@@ -21,25 +21,10 @@
 </template>
 
 <script lang="ts">
-import { debounce } from 'ts-debounce'
-import { Settings } from '../services/settings'
-
-interface Data {
-  settings: Settings
-}
-
 export default {
-  data (): Data {
+  data () {
     return {
       settings: this.$settings.settings
-    }
-  },
-  watch: {
-    settings: {
-      handler: debounce(function () {
-        this.$settings.save()
-      }, 500),
-      deep: true
     }
   },
   methods: {

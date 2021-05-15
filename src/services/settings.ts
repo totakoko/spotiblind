@@ -1,4 +1,8 @@
-const LOCAL_STORAGE_SETTINGS_KEY = 'spotiblind-settings'
+import { reactive } from "@vue/reactivity"
+import { watch } from "vue"
+import { debounce } from "ts-debounce"
+
+const LOCAL_STORAGE_SETTINGS_KEY = 'spotiblind:settings'
 
 export interface Settings {
   listenDuration: number
@@ -24,6 +28,11 @@ export class SettingsService {
         console.log('could not parse settings', e, 'settings=', settings)
       }
     }
+    this.settings = reactive(this.settings)
+
+    watch(this.settings, debounce(() => {
+      this.save()
+    }, 500))
   }
 
   save () {
