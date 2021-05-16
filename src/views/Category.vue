@@ -1,7 +1,6 @@
 <template>
   <div class="library">
-    <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/categories/${categoryId}/playlists/${playlist.id}`">
-    </app-button>
+    <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/categories/${categoryId}/playlists/${playlist.id}`" />
   </div>
 </template>
 
@@ -14,6 +13,7 @@ interface Data {
   category: Category | null
   playlists: Playlist[]
 }
+
 export default defineComponent({
   name: 'Category',
   props: {

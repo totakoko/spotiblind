@@ -1,6 +1,6 @@
-import { reactive } from "@vue/reactivity"
-import { watch } from "vue"
-import { debounce } from "ts-debounce"
+import { reactive } from '@vue/reactivity'
+import { watch } from 'vue'
+import { debounce } from 'ts-debounce'
 
 const LOCAL_STORAGE_SETTINGS_KEY = 'spotiblind:settings'
 
@@ -21,7 +21,7 @@ export class SettingsService {
 
   constructor () {
     const settings = localStorage.getItem(LOCAL_STORAGE_SETTINGS_KEY)
-    if (settings) {
+    if (settings !== null) {
       try {
         this.settings = JSON.parse(settings)
       } catch (e) {
@@ -35,11 +35,11 @@ export class SettingsService {
     }, 500))
   }
 
-  save () {
+  save (): void {
     localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(this.settings))
   }
 
-  reset () {
+  reset (): void {
     Object.assign(this.settings, defaultSettings)
   }
 }

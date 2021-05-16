@@ -1,8 +1,8 @@
 <template>
   <div class="wrapper">
-    <img :src="logoUrl" alt="SpotiBlind"/>
+    <img :src="logoUrl" alt="SpotiBlind">
     <app-button class="login-btn" @click="$spotifyClient.redirectToSpotifyLogin()">
-      <icon-mdi-spotify class="mr-2"/>
+      <icon-mdi-spotify class="mr-2" />
       Login via Spotify
     </app-button>
   </div>

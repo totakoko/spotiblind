@@ -3,25 +3,29 @@
     <h1>Settings</h1>
     <p>These settings are stored on a per-device basis. Connecting from another device will load the default settings.</p>
 
-    <app-button @click="loadDefaultSettings()">Reset settings</app-button>
+    <app-button @click="loadDefaultSettings()">
+      Reset settings
+    </app-button>
 
     <div class="form-field">
       <label for="tracks">Number of tracks per blind test</label>
-      <app-input id="tracks" type="number" v-model.number="settings.numberOfTracks" min="1" max="100"></app-input>
+      <app-input id="tracks" v-model.number="settings.numberOfTracks" type="number" min="1" max="100" />
     </div>
     <div class="form-field">
       <label for="listen">Listen duration per track (in seconds)</label>
-      <app-input id="listen" type="number" v-model.number="settings.listenDuration" min="1" max="90"></app-input>
+      <app-input id="listen" v-model.number="settings.listenDuration" type="number" min="1" max="90" />
     </div>
     <div class="form-field">
       <label for="pause">Pause between tracks (in seconds)</label>
-      <app-input id="pause" type="number" v-model.number="settings.pauseDuration" min="0" max="60"></app-input>
+      <app-input id="pause" v-model.number="settings.pauseDuration" type="number" min="0" max="60" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent } from 'vue'
+
+export default defineComponent({
   data () {
     return {
       settings: this.$settings.settings
@@ -32,7 +36,7 @@ export default {
       this.$settings.reset()
     }
   }
-}
+})
 </script>
 
 <style lang="sass" scoped>

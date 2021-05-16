@@ -1,16 +1,19 @@
 <template>
-  <h2>Categories</h2>
-  <div class="library">
-    <app-button v-for="category in categories" :key="category.id" dark class="library__item" :style="{backgroundImage: `url(${category.image})`}" :to="`/categories/${category.id}`">
-      {{ category.name }}
-    </app-button>
-  </div>
+  <!-- one root node for transitions -->
+  <div class="d-flex-column">
+    <h2>Categories</h2>
+    <div class="library">
+      <app-button v-for="category in categories" :key="category.id" dark class="library__item" :style="{backgroundImage: `url(${category.image})`}" :to="`/categories/${category.id}`">
+        {{ category.name }}
+      </app-button>
+    </div>
 
-  <h2>Playlists</h2>
-  <div class="library">
-    <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/playlists/${playlist.id}`">
-      {{ playlist.name }}
-    </app-button>
+    <h2>Playlists</h2>
+    <div class="library">
+      <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/playlists/${playlist.id}`">
+        {{ playlist.name }}
+      </app-button>
+    </div>
   </div>
 </template>
 

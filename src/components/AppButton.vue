@@ -1,7 +1,7 @@
 <template>
   <button :class="classes" :disabled="disable || loading" @click="handleClick">
-    <slot></slot>
-    <div class="button__overlay"></div>
+    <slot />
+    <div class="button__overlay" />
   </button>
 </template>
 
@@ -9,7 +9,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'app-button',
+  name: 'AppButton',
   props: {
     tag: {
       type: String,
@@ -32,6 +32,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['click'],
   data () {
     return {
       loading: false
@@ -50,7 +51,7 @@ export default defineComponent({
     }
   },
   methods: {
-    async handleClick() {
+    async handleClick () {
       if (this.to) {
         this.loading = true
         try {

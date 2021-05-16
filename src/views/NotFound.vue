@@ -1,12 +1,12 @@
 <template>
-<div class="wrapper">
-  ¯\_(ツ)_/¯
-  <br>
-  Page not found
-  <app-button class="home-link" title="Go to home page" to="/">
-    Home
-  </app-button>
-</div>
+  <div class="wrapper">
+    ¯\_(ツ)_/¯
+    <br>
+    Page not found
+    <app-button class="home-link" title="Go to home page" to="/">
+      Home
+    </app-button>
+  </div>
 </template>
 
 <style lang="sass" scoped>

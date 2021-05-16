@@ -15,7 +15,7 @@ import { config } from './config'
 
   const router = createRouter({
     history: createWebHistory(),
-    routes,
+    routes
   })
 
   const app = createApp(App)
@@ -23,4 +23,4 @@ import { config } from './config'
   app.config.globalProperties.$settings = settings
   app.config.globalProperties.$spotifyClient = spotifyClient
   app.mount('#app')
-})()
+})().catch(e => console.error(e))

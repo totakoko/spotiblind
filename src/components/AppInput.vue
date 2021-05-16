@@ -1,18 +1,20 @@
 <template>
-  <input :type="type" :class="classes" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"/>
+  <input :type="type" :class="classes" :value="modelValue" @input="">
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'app-input',
+  name: 'AppInput',
   props: {
     type: {
       type: String,
       default: 'text'
     },
-    modelValue: {}
+    modelValue: { // eslint-disable-line vue/require-prop-types
+      default: undefined
+    }
   },
   emits: ['update:modelValue'],
   data () {
@@ -24,6 +26,11 @@ export default defineComponent({
     classes () {
       const classes: string[] = ['input']
       return classes
+    }
+  },
+  methods: {
+    triggerClick (event: Event): void {
+      this.$emit('update:modelValue', (event.target as HTMLInputElement)!.value)
     }
   }
 })

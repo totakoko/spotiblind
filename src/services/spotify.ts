@@ -1,7 +1,4 @@
-const LOCAL_STORAGE_ACCESS_TOKEN_KEY = 'spotiblind-access-token'
-const LOCAL_STORAGE_REFRESH_TOKEN_KEY = 'spotiblind-refresh-token'
-const LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY = 'spotiblind-refresh-token-expiration'
-
+const LOCAL_STORAGE_AUTHENTICATION_KEY = 'spotiblind:authentication'
 
 export interface SpotifyClientConfig {
   clientId: string
@@ -9,10 +6,10 @@ export interface SpotifyClientConfig {
   redirectURI: string
 }
 
-interface InternalConfig extends SpotifyClientConfig {
-  accessToken?: string
-  refreshToken?: string
-  accessTokenExpiration?: number
+interface State {
+  accessToken: string
+  refreshToken: string
+  accessTokenExpiration: number
 }
 
 export interface Category {
@@ -25,43 +22,49 @@ export interface Playlist {
   id: string
   name: string
   image: string
+
+  tracks?: Track[]
+}
+
+export interface Track {
+  id: string
+  name: string
+  author: string
+  duration: number
 }
 
 const spotifyAPIScopes = [
   'user-read-playback-state',
   'user-modify-playback-state',
-  'playlist-read-private',
+  'playlist-read-private'
 ]
 
-/*
-config
-  clientId
-  clientSecret
-  redirectURI
-
-  // accessToken
-  // refreshToken
-
-*/
 export class SpotifyClient {
-  config: InternalConfig
+  private readonly config: SpotifyClientConfig
+  private state: State
 
   constructor (config: SpotifyClientConfig) {
     this.config = config
 
-    const accessToken = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY)
-    const refreshToken = localStorage.getItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY)
-    const accessTokenExpiration = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY)
-    if (accessToken && refreshToken) {
-      this.config.accessToken = accessToken
-      this.config.refreshToken = refreshToken
-      this.config.accessTokenExpiration = accessTokenExpiration as any
+    const state = localStorage.getItem(LOCAL_STORAGE_AUTHENTICATION_KEY)
+    if (state !== null) {
+      try {
+        this.state = JSON.parse(state)
+      } catch (e) {
+        throw new Error(`could not parse state: ${(e as Error)?.message}`)
+      }
+    } else {
+      this.state = {
+        accessToken: '',
+        refreshToken: '',
+        accessTokenExpiration: 0
+      }
     }
   }
 
-  async init () {
+  async init (): Promise<void> {
     const code = new URLSearchParams(window.location.search).get('code')
-    if (code) {
+    if (code !== null) {
       await this.authorize(code)
       window.history.replaceState('', document.title, '/')
       return
@@ -70,12 +73,12 @@ export class SpotifyClient {
     await this.tryAuthentication()
   }
 
-  redirectToSpotifyLogin () {
+  redirectToSpotifyLogin (): void {
     const url = `https://accounts.spotify.com/authorize?client_id=${this.config.clientId}&response_type=code&redirect_uri=${this.config.redirectURI}&scope=${spotifyAPIScopes.join(',')}`
     window.location = url as any
   }
 
-  async authorize (code: any) {
+  async authorize (code: any): Promise<void> {
     const searchParams = Object.entries({
       client_id: this.config.clientId,
       client_secret: this.config.clientSecret,
@@ -95,39 +98,31 @@ export class SpotifyClient {
       body: searchParams
     })
     const body = await res.json()
-    this.config.accessToken = body.access_token
-    this.config.refreshToken = body.refresh_token
-    this.config.accessTokenExpiration = Math.floor(Date.now() / 1000) + body.expires_in
-    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, this.config.accessToken)
-    localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, this.config.refreshToken)
-    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY, Math.floor(Date.now() / 1000) + body.expires_in)
-  }
-
-  logout () {
-    this.config.accessToken = ''
-    this.config.refreshToken = ''
-    this.config.accessTokenExpiration = 0
-    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, '')
-    localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, '')
-    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY, '')
-  }
-
-  getAuthHeaders () {
-    return {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.config.accessToken}`
+    this.state = {
+      accessToken: body.access_token,
+      refreshToken: body.refresh_token,
+      accessTokenExpiration: Math.floor(Date.now() / 1000) + (body.expires_in as number)
     }
+    this.saveState()
   }
 
-  async tryAuthentication () {
-    if (this.config.accessToken) {
+  logout (): void {
+    this.state = {
+      accessToken: '',
+      refreshToken: '',
+      accessTokenExpiration: 0
+    }
+    this.saveState()
+  }
+
+  async tryAuthentication (): Promise<boolean> {
+    if (this.state.accessToken !== '') {
       // validate the access token
       try {
         await this.getUserProfile()
 
         // set a timer to refresh the access token 10 minutes before expiration
-        const remainingValidity = Math.floor(Date.now() / 1000) - this.config.accessTokenExpiration
+        const remainingValidity = Math.floor(Date.now() / 1000) - this.state.accessTokenExpiration
         setTimeout(async () => {
           await this.refreshAccessToken()
         }, (remainingValidity - 600) * 1000)
@@ -139,16 +134,16 @@ export class SpotifyClient {
     return false
   }
 
-  isLoggedIn () {
-    return !!this.config.accessToken
+  isLoggedIn (): boolean {
+    return this.state.accessToken.length > 0
   }
 
-  async refreshAccessToken () {
+  async refreshAccessToken (): Promise<void> {
     const searchParams = Object.entries({
       client_id: this.config.clientId,
       client_secret: this.config.clientSecret,
       grant_type: 'refresh_token',
-      refresh_token: this.config.refreshToken
+      refresh_token: this.state.refreshToken
     })
       .map(([key, value]) => {
         return encodeURIComponent(key) + '=' + encodeURIComponent(value)
@@ -163,10 +158,9 @@ export class SpotifyClient {
     this.ensureValidResponse(res)
     const result = await res.json()
 
-    this.config.accessToken = result.access_token
-    this.config.accessTokenExpiration = Math.floor(Date.now() / 1000) + result.expires_in
-    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, this.config.accessToken)
-    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_EXPIRATION_KEY, this.config.accessTokenExpiration)
+    this.state.accessToken = result.access_token
+    this.state.accessTokenExpiration = Math.floor(Date.now() / 1000) + (result.expires_in as number)
+    this.saveState()
 
     // refresh the access token 10 minutes before expiration
     setTimeout(async () => {
@@ -174,7 +168,7 @@ export class SpotifyClient {
     }, (result.expires_in - 600) * 1000)
   }
 
-  async getUserProfile () {
+  async getUserProfile (): Promise<any> {
     const res = await fetch('https://api.spotify.com/v1/me', {
       headers: this.getAuthHeaders(),
       method: 'GET'
@@ -182,8 +176,8 @@ export class SpotifyClient {
     this.ensureValidResponse(res)
   }
 
-  async getPlaylist (playlistID: string) {
-    return this.fetchAllItems(`https://api.spotify.com/v1/playlists/${playlistID}`, 'tracks', 100)
+  async getPlaylist (playlistID: string): Promise<any> {
+    return await this.fetchAllItems(`https://api.spotify.com/v1/playlists/${playlistID}`, 'tracks', 100)
   }
 
   async getCategories (): Promise<Category[]> {
@@ -217,7 +211,7 @@ export class SpotifyClient {
   }
 
   async getUserPlaylists (): Promise<Playlist[]> {
-    const body = await this.fetchAllItems(`https://api.spotify.com/v1/me/playlists`, 'items', 50)
+    const body = await this.fetchAllItems('https://api.spotify.com/v1/me/playlists', 'items', 50)
     return body.items.map((playlist: any) => {
       return {
         id: playlist.id,
@@ -227,7 +221,7 @@ export class SpotifyClient {
     })
   }
 
-  async getAvailableDevices () {
+  async getAvailableDevices (): Promise<any> {
     const res = await fetch('https://api.spotify.com/v1/me/player/devices', {
       headers: this.getAuthHeaders()
     })
@@ -235,7 +229,7 @@ export class SpotifyClient {
     return (await res.json()).devices
   }
 
-  async transferPlayback (deviceId: string) {
+  async transferPlayback (deviceId: string): Promise<void> {
     const res = await fetch('https://api.spotify.com/v1/me/player', {
       headers: this.getAuthHeaders(),
       method: 'PUT',
@@ -247,7 +241,7 @@ export class SpotifyClient {
     this.ensureValidResponse(res)
   }
 
-  async play (trackID: string, startPosition = 0) {
+  async play (trackID: string, startPosition = 0): Promise<void> {
     const res = await fetch('https://api.spotify.com/v1/me/player/play', {
       headers: this.getAuthHeaders(),
       method: 'PUT',
@@ -259,7 +253,7 @@ export class SpotifyClient {
     this.ensureValidResponse(res)
   }
 
-  async pause () {
+  async pause (): Promise<void> {
     const res = await fetch('https://api.spotify.com/v1/me/player/pause', {
       headers: this.getAuthHeaders(),
       method: 'PUT'
@@ -268,7 +262,7 @@ export class SpotifyClient {
   }
 
   async fetchAllItems (url: string, collectionKey: string, limit: number): Promise<any> {
-    if (url.indexOf('?') === -1) {
+    if (!url.includes('?')) {
       url += '?'
     }
     const res = await fetch(`${url}&limit=${limit}`, {
@@ -295,10 +289,21 @@ export class SpotifyClient {
     return body
   }
 
-  // private
-  ensureValidResponse (response: Response) {
+  private ensureValidResponse (response: Response): void {
     if (!/^2/.test(response.status.toFixed())) {
       throw new Error(`Invalid response: ${response.statusText}`)
+    }
+  }
+
+  private saveState (): void {
+    localStorage.setItem(LOCAL_STORAGE_AUTHENTICATION_KEY, JSON.stringify(this.state))
+  }
+
+  private getAuthHeaders (): any {
+    return {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${this.state.accessToken}`
     }
   }
 }

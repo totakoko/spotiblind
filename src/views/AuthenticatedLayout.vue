@@ -4,13 +4,13 @@
       SpotiBlind
     </app-button>
 
-    <div class="u-spacer"></div>
+    <div class="u-spacer" />
 
     <app-button dark tile title="Settings" to="/settings">
-      <icon-mdi-cog class="navbar__icon"/>
+      <icon-mdi-cog class="navbar__icon" />
     </app-button>
     <app-button dark tile title="Log out" @click="logout()">
-      <icon-mdi-logout class="navbar__icon"/>
+      <icon-mdi-logout class="navbar__icon" />
     </app-button>
   </div>
 
