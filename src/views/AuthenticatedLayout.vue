@@ -29,25 +29,27 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   data () {
     return {
-      noDevicesFound: false,
-      devicesCheckTimeout: 0
+      noDevicesFound: false
     }
   },
   async created () {
     if (!this.$spotifyClient.isLoggedIn()) {
       await this.$router.push('/login')
+      return
     }
-    this.devicesCheckTimeout = setInterval(async () => {
-      this.noDevicesFound = (await this.$spotifyClient.getAvailableDevices()).length === 0
-    }, 5000)
+    this.$spotifyClient.start()
+
+    this.$watch(() => this.$spotifyClient.devices.value.length, (devicesCount: number) => {
+      this.noDevicesFound = devicesCount === 0
+    })
   },
   unmounted () {
-    clearInterval(this.devicesCheckTimeout)
+    this.$spotifyClient.stop()
   },
   methods: {
-    logout () {
+    async logout () {
       this.$spotifyClient.logout()
-      window.location.assign('/')
+      await this.$router.push('/login')
     }
   }
 })
