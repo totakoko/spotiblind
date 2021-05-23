@@ -1,6 +1,6 @@
 <template>
   <!-- one root node for transitions -->
-  <div class="d-flex-column">
+  <div v-if="loaded" class="d-flex-column">
     <h2>Categories</h2>
     <div class="library">
       <app-button v-for="category in categories" :key="category.id" dark class="library__item" :style="{backgroundImage: `url(${category.image})`}" :to="`/categories/${category.id}`">
@@ -24,22 +24,30 @@ import { Category } from '../services/spotify'
 export default defineComponent({
   name: 'Library',
   data: () => ({
+    loaded: false,
     categories: [] as Category[],
     playlists: [] as Category[]
   }),
   async created () {
-    this.categories = await this.$spotifyClient.getCategories()
-    this.categories.forEach(category => {
-      if (category.name.includes('/')) {
-        category.name = category.name.replace(/\//, ' / ')
-      }
-    })
-    this.playlists = await this.$spotifyClient.getUserPlaylists()
-    this.playlists.forEach(category => {
-      if (category.name.includes('/')) {
-        category.name = category.name.replace(/\//, ' / ')
-      }
-    })
+    await Promise.all([
+      (async () => {
+        this.categories = await this.$spotifyClient.getCategories()
+        this.categories.forEach(category => {
+          if (category.name.includes('/')) {
+            category.name = category.name.replace(/\//, ' / ')
+          }
+        })
+      })(),
+      (async () => {
+        this.playlists = await this.$spotifyClient.getUserPlaylists()
+        this.playlists.forEach(category => {
+          if (category.name.includes('/')) {
+            category.name = category.name.replace(/\//, ' / ')
+          }
+        })
+      })()
+    ])
+    this.loaded = true
   }
 })
 </script>
