@@ -80,22 +80,7 @@ export class SpotifyClient {
   }
 
   start (): void {
-    this.devicesCheckRoutine = setInterval(async () => {
-      try {
-        const devices: any[] = this.devices.value = await this.getAvailableDevices()
-        if (devices.length === 0) {
-          console.log('no device found')
-          return
-        }
-
-        // if all devices are inactive, select the first
-        if (devices.every((device: any) => !(device.is_active as boolean))) {
-          await this.transferPlayback(devices[0].id)
-        }
-      } catch (error) {
-        console.log('could not get devices', error)
-      }
-    }, devicesCheckRoutineInterval)
+    this.devicesCheckRoutine = setInterval(this.checkDevices.bind(this), devicesCheckRoutineInterval)
   }
 
   stop (): void {
@@ -316,6 +301,24 @@ export class SpotifyClient {
       })
     }
     return body
+  }
+
+  async checkDevices (): Promise<void> {
+    try {
+      const devices: any[] = this.devices.value = await this.getAvailableDevices()
+      if (devices.length === 0) {
+        console.log('no device found')
+        return
+      }
+
+      // if all devices are inactive, select the first
+      if (devices.every((device: any) => !(device.is_active as boolean))) {
+        await this.transferPlayback(devices[0].id)
+      }
+    } catch (error) {
+      console.log('could not get devices', error)
+      this.devices.value = []
+    }
   }
 
   private ensureValidResponse (response: Response): void {

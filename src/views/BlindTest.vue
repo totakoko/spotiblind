@@ -1,29 +1,31 @@
 <template>
   <div v-if="loaded" class="blindtest">
-    <!-- <v-breadcrumbs :items="breadcrumbs" /> -->
-
-    <img :src="playlist?.image">
-    <h1>{{ playlist?.name }}</h1>
-
-    <div class="blindtest__progress">
-      <!-- <v-progress-linear
-        v-model="waitProgress"
-        color="indigo darken-1"
-        height="10"
-      /> -->
+    <div class="blindtest__header" :class="{'blindtest__header--row': started}">
+      <img :src="playlist?.image" class="blindtest__image">
+      <h1 class="blindtest__title">
+        {{ playlist?.name }}
+      </h1>
     </div>
 
-    <div v-for="(track, index) in pastTracks" :key="index" class="blindtest__track">
-      {{ track.author }} : {{ track.name }}
-      <!-- icon -->
-      <app-button v-if="finished" title="Play this track" @click="playTrack(track.id)">
-        <icon-mdi-play-circle />
-      </app-button>
-    </div>
-
-    <app-button v-if="finished" class="mt-3" @click="startRandomBlindTest()">
-      Start a new blindtest
+    <app-button v-if="!started" class="blindtest__start-btn" :disabled="missingDevice" @click="startRandomBlindTest()">
+      Start the blind test!
     </app-button>
+
+    <template v-else>
+      <transition-group name="fade">
+        <div v-for="(track, index) in pastTracks" :key="index" class="blindtest__track">
+          {{ track.author }} : {{ track.name }}
+          <app-button v-if="finished" title="Play this track" @click="playTrack(track.id)">
+            <icon-mdi-play-circle />
+          </app-button>
+        </div>
+      </transition-group>
+      <progress v-if="!finished" class="blindtest__progress" max="100" :value="waitProgress" />
+
+      <app-button v-if="finished" class="mt-3" @click="startRandomBlindTest()">
+        Start a new blindtest
+      </app-button>
+    </template>
   </div>
 </template>
 
@@ -33,6 +35,17 @@ import { Category, Playlist, Track } from '../services/spotify'
 
 function wait (ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+function shuffle<T extends any> (array: Array<T>): Array<T> {
+  const newArr = []
+  const source = array.slice()
+  while (source.length > 0) {
+    const randomIndex = Math.floor(Math.random() * source.length)
+    const element = source.splice(randomIndex, 1)
+    newArr.push(element[0])
+  }
+
+  return array
 }
 
 export default defineComponent({
@@ -48,6 +61,7 @@ export default defineComponent({
   },
   data: () => ({
     loaded: false,
+    started: false,
     playlist: null as Playlist | null,
     category: null as Category | null,
     pastTracks: [] as Track[],
@@ -57,6 +71,9 @@ export default defineComponent({
     abort: false
   }),
   computed: {
+    missingDevice (): boolean {
+      return this.$spotifyClient.devices.value.length === 0
+    },
     breadcrumbs () {
       const breadcrumbs = [
         {
@@ -85,34 +102,31 @@ export default defineComponent({
     }
   },
   async created () {
-    if (await this.assertDevicesConnected()) {
-      await Promise.all([
-        (async () => {
-          if (this.categoryId) {
-            this.category = await this.$spotifyClient.getCategory(this.categoryId)
-          }
-        })(),
-        (async () => {
-          const playlist = await this.$spotifyClient.getPlaylist(this.playlistId)
-          this.playlist = {
-            id: playlist.id,
-            name: playlist.name,
-            image: playlist.images[0].url,
-            tracks: playlist.tracks.items.map((track: any) => {
-              return {
-                id: track.track.id,
-                name: track.track.name,
-                author: track.track.artists[0].name,
-                duration: track.track.duration_ms
-              }
-            })
-          }
-        })()
-      ])
-      this.loaded = true
-
-      this.startRandomBlindTest()
-    }
+    await Promise.all([
+      this.$spotifyClient.checkDevices(),
+      (async () => {
+        if (this.categoryId) {
+          this.category = await this.$spotifyClient.getCategory(this.categoryId)
+        }
+      })(),
+      (async () => {
+        const playlist = await this.$spotifyClient.getPlaylist(this.playlistId)
+        this.playlist = {
+          id: playlist.id,
+          name: playlist.name,
+          image: playlist.images[0].url,
+          tracks: playlist.tracks.items.map((track: any) => {
+            return {
+              id: track.track.id,
+              name: track.track.name,
+              author: track.track.artists[0].name,
+              duration: track.track.duration_ms
+            }
+          })
+        }
+      })()
+    ])
+    this.loaded = true
   },
   unmounted () {
     if (!this.finished) {
@@ -121,30 +135,14 @@ export default defineComponent({
     }
   },
   methods: {
-    async assertDevicesConnected () {
-      try {
-        const devices = await this.$spotifyClient.getAvailableDevices()
-        if (devices.length === 0) {
-          console.log('no device found')
-          return false
-        }
-        if (devices.every((device: any) => !device.is_active)) {
-          await this.$spotifyClient.transferPlayback(devices[0].id)
-        }
-        return true
-      } catch (error) {
-        console.log('could not get devices', error)
-        return false
-      }
-    },
     startRandomBlindTest () {
       this.startBlindTest(
-        this.playlist!.tracks!
-          .sort((a, b) => 0.5 - Math.random())
+        shuffle(this.playlist!.tracks!)
           .slice(0, this.$settings.settings.numberOfTracks)
       )
     },
     async startBlindTest (tracks: Track[]) {
+      this.started = true
       this.finished = false
       this.pastTracks = []
 
@@ -193,6 +191,7 @@ export default defineComponent({
 
         this.currentTrack++
       }
+      this.started = false
       this.finished = true
     },
 
@@ -204,11 +203,49 @@ export default defineComponent({
 })
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .blindtest
   display: flex
   flex-direction: column
   align-items: center
+
+  &__header
+    display: flex
+    flex-direction: column
+    align-items: center
+
+    &--row
+      flex-direction: row
+      margin-bottom: 1em
+
+      .blindtest__image
+        max-width: 30vw
+        max-height: 20em
+        margin-right: 1em
+
+      .blindtest__title
+        font-size: 1.5em
+        margin-top: 0
+        margin-bottom: 0
+
+        @media (min-width: 1280px)
+          font-size: 2em
+
+  &__image
+    max-height: 40vh
+    max-width: 80%
+
+  &__title
+    margin-top: 1em
+    margin-bottom: 1em
+
+  &__start-btn
+    font-size: 1.4em
+    padding: .5em
+    margin: 1em
+
+    &:not([disabled])
+      animation: 1.5s ease-in infinite alternate scale
 
   &__back-to-playlists-btn
     position: absolute !important
@@ -216,11 +253,29 @@ export default defineComponent({
     right: 1vw
 
   &__progress
-    padding: 2em
+    margin-top: 1em
+    margin-bottom: 1em
+    padding: 1em
     width: 100%
-    max-width: 800px
-    transition: .1s linear !important
+    max-width: 960px
 
   &__track
-    font-size: 2em
+    @media (min-width: 960px)
+      font-size: 2em
+
+@keyframes scale
+  from
+      transform: scale(1)
+  to
+      transform: scale(1.5)
+
+.fade-enter-active,
+.fade-leave-active
+  transition: all 1s ease
+
+.fade-enter-from,
+.fade-leave-to
+  opacity: 0
+  transform: translateY(30px)
+
 </style>
