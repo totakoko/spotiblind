@@ -1,4 +1,4 @@
-import { Ref, ref } from '@vue/reactivity'
+import { Ref, shallowRef } from '@vue/reactivity'
 
 const LOCAL_STORAGE_AUTHENTICATION_KEY = 'spotiblind:authentication'
 
@@ -47,7 +47,7 @@ export class SpotifyClient {
   private readonly config: SpotifyClientConfig
   private state: State
   private devicesCheckRoutine: number = -1
-  public devices: Ref<any[]> = ref([])
+  public devices: Ref<any[]> = shallowRef([])
 
   constructor (config: SpotifyClientConfig) {
     this.config = config

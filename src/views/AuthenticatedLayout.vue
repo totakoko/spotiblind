@@ -18,7 +18,7 @@
     <router-view />
   </div>
 
-  <div v-if="noDevicesFound" class="no-devices-found-banner">
+  <div v-if="missingDevice" class="no-devices-found-banner">
     No Spotify devices found!
   </div>
 </template>
@@ -27,9 +27,9 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  data () {
-    return {
-      noDevicesFound: false
+  computed: {
+    missingDevice () {
+      return this.$spotifyClient.devices.value.length === 0
     }
   },
   async created () {
@@ -38,10 +38,6 @@ export default defineComponent({
       return
     }
     this.$spotifyClient.start()
-
-    this.$watch(() => this.$spotifyClient.devices.value.length, (devicesCount: number) => {
-      this.noDevicesFound = devicesCount === 0
-    })
   },
   unmounted () {
     this.$spotifyClient.stop()
