@@ -11,18 +11,6 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
-html
-  box-sizing: border-box
-  word-break: pre-line
-
-*,
-*:before,
-*:after
-  box-sizing: inherit
-
-body
-  margin: 0
-
 #app
   font-family: Avenir, Helvetica, Arial, sans-serif
   -webkit-font-smoothing: antialiased
