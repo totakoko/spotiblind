@@ -76,7 +76,9 @@ export class SpotifyClient {
       return
     }
 
-    await this.tryAuthentication()
+    if (await this.tryAuthentication()) {
+      await this.checkDevices()
+    }
   }
 
   start (): void {
@@ -140,6 +142,7 @@ export class SpotifyClient {
         setTimeout(async () => {
           await this.refreshAccessToken()
         }, (remainingValidity - 600) * 1000)
+        return true
       } catch (error) {
         console.log('could not get user profile', error)
         await this.refreshAccessToken()
