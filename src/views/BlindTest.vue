@@ -7,7 +7,7 @@
       </h1>
     </div>
 
-    <app-button v-if="!started" class="blindtest__start-btn" :disabled="missingDevice" @click="startRandomBlindTest()">
+    <app-button v-if="!started" class="blindtest__start-btn" :disabled="missingDevice" @click="startBlindTest()">
       Start the blind test!
     </app-button>
 
@@ -15,14 +15,14 @@
       <transition-group name="fade">
         <div v-for="(track, index) in pastTracks" :key="index" class="blindtest__track">
           {{ track.author }} : {{ track.name }}
-          <app-button v-if="finished" title="Play this track" @click="playTrack(track.id)">
+          <app-button v-if="finished" tile title="Play this track" @click="playTrack(track.id)">
             <icon-mdi-play-circle />
           </app-button>
         </div>
       </transition-group>
-      <progress v-if="!finished" class="blindtest__progress" max="100" :value="waitProgress" />
+      <app-progress v-if="!finished" :duration="progressDuration" class="blindtest__progress" />
 
-      <app-button v-if="finished" class="mt-3" @click="startRandomBlindTest()">
+      <app-button v-if="finished" tile class="mt-3" @click="startBlindTest()">
         Start a new blindtest
       </app-button>
     </template>
@@ -31,24 +31,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import AppProgress from '../components/AppProgress.vue'
 import { Category, Playlist, Track } from '../services/spotify'
-
-function wait (ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-function shuffle<T extends any> (array: Array<T>): Array<T> {
-  const newArr = []
-  const source = array.slice()
-  while (source.length > 0) {
-    const randomIndex = Math.floor(Math.random() * source.length)
-    const element = source.splice(randomIndex, 1)
-    newArr.push(element[0])
-  }
-
-  return array
-}
+import { shuffleArray } from '../util/util'
 
 export default defineComponent({
+  components: { AppProgress },
   props: {
     categoryId: {
       type: String,
@@ -61,14 +49,15 @@ export default defineComponent({
   },
   data: () => ({
     loaded: false,
-    started: false,
     playlist: null as Playlist | null,
     category: null as Category | null,
+
+    started: false,
+    pendingTracks: [] as Track[],
     pastTracks: [] as Track[],
-    currentTrack: 0,
-    waitProgress: 0,
+    progressDuration: -1,
     finished: false,
-    abort: false
+    stepTimeout: -1
   }),
   computed: {
     missingDevice (): boolean {
@@ -99,6 +88,12 @@ export default defineComponent({
         })
       }
       return breadcrumbs
+    },
+    listenDuration (): number {
+      return this.$settings.settings.listenDuration * 1000
+    },
+    pauseDuration (): number {
+      return this.$settings.settings.pauseDuration * 1000
     }
   },
   async created () {
@@ -130,76 +125,41 @@ export default defineComponent({
   },
   unmounted () {
     if (!this.finished) {
-      this.abort = true
+      clearTimeout(this.stepTimeout)
       this.$spotifyClient.pause().catch(() => {})
     }
   },
   methods: {
-    startRandomBlindTest () {
-      this.startBlindTest(
-        shuffle(this.playlist!.tracks!)
-          .slice(0, this.$settings.settings.numberOfTracks)
-      )
-    },
-    async startBlindTest (tracks: Track[]) {
+    async startBlindTest () {
       this.started = true
       this.finished = false
+      this.pendingTracks = shuffleArray(this.playlist!.tracks!).slice(0, this.$settings.settings.numberOfTracks)
       this.pastTracks = []
+      await this.stepTrack()
+    },
 
-      const listenDuration = this.$settings.settings.listenDuration * 1000
-      const pauseDuration = this.$settings.settings.pauseDuration * 1000
-
-      this.currentTrack = 0
-      while (this.currentTrack < tracks.length) {
-        const track = this.playlist!.tracks![this.currentTrack]
-        const startPosition = Math.floor(Math.random() * (track.duration - listenDuration))
-        await this.$spotifyClient.play(track.id, startPosition)
-        this.waitProgress = 0
-        let startTime = Date.now()
-        let timer = setInterval(() => {
-          if (this.abort) {
-            clearInterval(timer)
-            return
-          }
-          this.waitProgress = (Date.now() - startTime) * 100 / listenDuration
-        }, 32)
-        await wait(listenDuration)
-
-        if (this.abort) {
-          return
-        }
-        clearInterval(timer)
-        this.waitProgress = 0
-        await this.$spotifyClient.pause()
-        this.pastTracks.push(track)
-
-        this.waitProgress = 0
-        startTime = Date.now()
-        timer = setInterval(() => {
-          if (this.abort) {
-            clearInterval(timer)
-            return
-          }
-          this.waitProgress = (Date.now() - startTime) * 100 / pauseDuration
-        }, 32)
-        await wait(pauseDuration)
-
-        if (this.abort) {
-          return
-        }
-        clearInterval(timer)
-
-        this.currentTrack++
+    async stepTrack () {
+      const [track] = this.pendingTracks.splice(0, 1)
+      const startPosition = Math.floor(Math.random() * (track.duration - this.listenDuration))
+      await this.$spotifyClient.play(track.id, startPosition)
+      this.progressDuration = this.listenDuration
+      this.stepTimeout = setTimeout(this.stepPause.bind(this), this.listenDuration, track)
+    },
+    async stepPause (track: Track) {
+      await this.$spotifyClient.pause()
+      this.pastTracks.push(track)
+      if (this.pendingTracks.length > 0) {
+        this.progressDuration = this.pauseDuration
+        this.stepTimeout = setTimeout(this.stepTrack.bind(this), this.pauseDuration)
+      } else {
+        this.finished = true
       }
-      this.started = false
-      this.finished = true
     },
 
     async playTrack (trackId: string): Promise<void> {
       await this.$spotifyClient.play(trackId)
     }
   }
-
 })
 </script>
 
