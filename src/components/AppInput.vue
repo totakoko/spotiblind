@@ -39,10 +39,11 @@ export default defineComponent({
 <style lang="sass" scoped>
 .input
   line-height: 2em
-  height: 1em
+  height: 1.5em
   padding: 8px
   padding-right: 0
   border-style: solid
+  transition: background-color .3s
 
   &:invalid
     outline-color: red
@@ -50,5 +51,5 @@ export default defineComponent({
     color: red
 
   &:hover
-    background-color: #e7e7e755
+    background-color: #d7d7d755
 </style>

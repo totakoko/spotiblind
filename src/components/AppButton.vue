@@ -100,6 +100,7 @@ export default defineComponent({
     left: 0
     bottom: 0
     right: 0
+    transition: all .3s
 
     &:hover
       background-color: #e7e7e755
