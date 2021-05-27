@@ -15,7 +15,7 @@ build:
     - yarn lint
 
     # build
-    - yarn build --prod
+    - yarn build
   cache:
     key: dependencies-${CI_COMMIT_REF_NAME}
     paths:
