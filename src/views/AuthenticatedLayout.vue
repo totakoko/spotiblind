@@ -15,7 +15,7 @@
   </div>
 
   <div class="content">
-    <router-view />
+    <router-view v-if="authenticated" />
   </div>
 
   <div v-if="missingDevice" class="no-devices-found-banner">
@@ -27,6 +27,11 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  data () {
+    return {
+      authenticated: false
+    }
+  },
   computed: {
     missingDevice () {
       return this.$spotifyClient.devices.value.length === 0
@@ -37,6 +42,7 @@ export default defineComponent({
       await this.$router.push('/login')
       return
     }
+    this.authenticated = true
     this.$spotifyClient.start()
   },
   unmounted () {
