@@ -233,7 +233,7 @@ export class SpotifyClient {
       return {
         id: playlist.id,
         name: playlist.name,
-        image: playlist.images[0].url
+        image: playlist.images[0]?.url
       }
     })
   }

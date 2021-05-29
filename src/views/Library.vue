@@ -10,8 +10,9 @@
 
     <h2>Playlists</h2>
     <div class="library">
-      <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/playlists/${playlist.id}`">
+      <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :class="{'library__item--empty': !playlist.image}" :style="{backgroundImage: playlist.image ? `url(${playlist.image})` : ''}" :to="`/playlists/${playlist.id}`">
         {{ playlist.name }}
+        <icon-mdi-music-note v-if="!playlist.image" style="margin: 1em" />
       </app-button>
     </div>
   </div>
@@ -60,4 +61,6 @@ export default defineComponent({
   font-weight: 400 !important
   flex-direction: column-reverse
 
+  &--empty
+    background-color: #282828
 </style>

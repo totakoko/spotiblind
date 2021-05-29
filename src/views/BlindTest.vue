@@ -7,7 +7,11 @@
       </h1>
     </div>
 
-    <app-button v-if="!started" class="blindtest__start-btn" :disabled="missingDevice" @click="startBlindTest()">
+    <div v-if="emptyPlaylist" class="">
+      This playlist does not contain any song!
+    </div>
+
+    <app-button v-if="!started" class="blindtest__start-btn" :disabled="!canStartBlindTest" @click="startBlindTest()">
       Start the blind test!
     </app-button>
 
@@ -94,6 +98,12 @@ export default defineComponent({
     },
     pauseDuration (): number {
       return this.$settings.settings.pauseDuration * 1000
+    },
+    emptyPlaylist (): boolean {
+      return this.playlist?.tracks?.length === 0
+    },
+    canStartBlindTest (): boolean {
+      return !this.missingDevice && !this.emptyPlaylist
     }
   },
   async created () {
@@ -109,7 +119,7 @@ export default defineComponent({
         this.playlist = {
           id: playlist.id,
           name: playlist.name,
-          image: playlist.images[0].url,
+          image: playlist.images[0]?.url,
           tracks: playlist.tracks.items.map((track: any) => {
             return {
               id: track.track.id,
