@@ -230,6 +230,9 @@ export default defineComponent({
     max-width: 960px
 
   &__track
+    display: flex
+    align-items: center
+
     @media (min-width: 960px)
       font-size: 2em
 
