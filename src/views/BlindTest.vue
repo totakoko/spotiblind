@@ -26,7 +26,7 @@
       </transition-group>
       <app-progress v-if="!finished" :duration="progressDuration" class="blindtest__progress" />
 
-      <app-button v-if="finished" tile class="mt-3" @click="startBlindTest()">
+      <app-button v-if="finished" class="mt-3" @click="startBlindTest()">
         Start a new blindtest
       </app-button>
     </template>
@@ -248,4 +248,6 @@ export default defineComponent({
   opacity: 0
   transform: translateY(30px)
 
+.mt-3
+  margin-top: 16px
 </style>
