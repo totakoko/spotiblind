@@ -120,14 +120,16 @@ export default defineComponent({
           id: playlist.id,
           name: playlist.name,
           image: playlist.images[0]?.url,
-          tracks: playlist.tracks.items.map((track: any) => {
-            return {
-              id: track.track.id,
-              name: track.track.name,
-              author: track.track.artists[0].name,
-              duration: track.track.duration_ms
-            }
-          })
+          tracks: playlist.tracks.items
+            .filter((track: any) => !!track.track) // some tracks may be null...
+            .map((track: any) => {
+              return {
+                id: track.track.id,
+                name: track.track.name,
+                author: track.track.artists[0].name,
+                duration: track.track.duration_ms
+              }
+            })
         }
       })()
     ])
