@@ -181,9 +181,15 @@ export class SpotifyClient {
           console.log('could not get user profile', error)
         }
       }
-      // the access token has expired
-      await this.refreshAccessToken()
-      return true
+      try {
+        // the access token has expired
+        await this.refreshAccessToken()
+        return true
+      } catch (error) {
+        // refresh token may be wrong
+        console.log('could not refresh access token', error)
+        this.logout()
+      }
     }
     return false
   }
