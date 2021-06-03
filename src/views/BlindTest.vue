@@ -136,7 +136,7 @@ export default defineComponent({
     this.loaded = true
   },
   unmounted () {
-    if (!this.finished) {
+    if (this.started && !this.finished) {
       clearTimeout(this.stepTimeout)
       this.$spotifyClient.pause().catch(() => {})
     }
