@@ -60,6 +60,7 @@ export default defineComponent({
   font-size: 1.2em !important
   font-weight: 400 !important
   flex-direction: column-reverse
+  text-shadow: 0 0 8px #000000
 
   &--empty
     background-color: #282828
