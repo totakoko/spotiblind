@@ -1,5 +1,6 @@
 <template>
   <router-view />
+  <app-pwa-reload />
 </template>
 
 <script lang="ts">
