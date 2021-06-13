@@ -1,7 +1,7 @@
 <template>
   <div v-if="loaded" class="blindtest">
     <div class="blindtest__header" :class="{'blindtest__header--row': started}">
-      <img :src="playlist?.image" class="blindtest__image">
+      <img :src="playlist?.image" alt="Playlist logo" class="blindtest__image">
       <h1 class="blindtest__title">
         {{ playlist?.name }}
       </h1>

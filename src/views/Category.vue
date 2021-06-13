@@ -1,6 +1,6 @@
 <template>
   <div class="library">
-    <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/categories/${categoryId}/playlists/${playlist.id}`" />
+    <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/categories/${categoryId}/playlists/${playlist.id}`" :title="playlist.name" />
   </div>
 </template>
 
