@@ -41,6 +41,14 @@ import { shuffleArray } from '../util/util'
 
 export default defineComponent({
   components: { AppProgress },
+  beforeRouteLeave () {
+    if (this.started) {
+      const answer = window.confirm('Do you really want to leave?')
+      if (!answer) {
+        return false
+      }
+    }
+  },
   props: {
     categoryId: {
       type: String,
@@ -139,6 +147,7 @@ export default defineComponent({
     if (this.started && !this.finished) {
       clearTimeout(this.stepTimeout)
       this.$spotifyClient.pause().catch(() => {})
+      window.removeEventListener('beforeunload', this.onBeforeLeaving)
     }
   },
   methods: {
@@ -147,6 +156,7 @@ export default defineComponent({
       this.finished = false
       this.pendingTracks = shuffleArray(this.playlist!.tracks!).slice(0, this.$settings.settings.numberOfTracks)
       this.pastTracks = []
+      window.addEventListener('beforeunload', this.onBeforeLeaving)
       await this.stepTrack()
     },
 
@@ -165,11 +175,20 @@ export default defineComponent({
         this.stepTimeout = setTimeout(this.stepTrack.bind(this), this.pauseDuration)
       } else {
         this.finished = true
+        window.removeEventListener('beforeunload', this.onBeforeLeaving)
       }
     },
 
     async playTrack (trackId: string): Promise<void> {
       await this.$spotifyClient.play(trackId)
+    },
+
+    // show a confirm dialog to the user
+    onBeforeLeaving: (event: BeforeUnloadEvent) => {
+      // Cancel the event
+      event.preventDefault()
+      // Chrome requires returnValue to be set
+      event.returnValue = ''
     }
   }
 })
