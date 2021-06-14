@@ -6,7 +6,6 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'AppInput',
   props: {
     type: {
       type: String,

@@ -23,7 +23,6 @@ import { defineComponent } from 'vue'
 import { Category } from '../services/spotify'
 
 export default defineComponent({
-  name: 'Library',
   data: () => ({
     loaded: false,
     categories: [] as Category[],

@@ -15,7 +15,6 @@ interface Data {
 }
 
 export default defineComponent({
-  name: 'Category',
   props: {
     categoryId: {
       type: String,

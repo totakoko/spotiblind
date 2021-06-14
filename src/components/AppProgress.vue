@@ -6,7 +6,6 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'AppProgress',
   props: {
     duration: {
       type: Number,

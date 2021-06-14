@@ -9,7 +9,6 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'AppButton',
   props: {
     tag: {
       type: String,
