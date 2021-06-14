@@ -1,15 +1,14 @@
 <template>
-  <div v-if="offlineReady || needRefresh" class="pwa-toast" role="alert">
+  <div v-if="needRefresh" class="pwa-toast" role="alert">
     <div class="message">
-      <span v-if="offlineReady">App ready to work offline</span>
-      <span v-else>New content available, click on reload button to update.</span>
+      New content available, click on reload button to update.
     </div>
-    <button v-if="needRefresh" @click="updateServiceWorker()">
+    <app-button v-if="needRefresh" @click="updateServiceWorker()">
       Reload
-    </button>
-    <button @click="close">
+    </app-button>
+    <app-button @click="close()">
       Close
-    </button>
+    </app-button>
   </div>
 </template>
 
@@ -21,18 +20,15 @@ import { useRegisterSW } from 'virtual:pwa-register/vue'
 export default defineComponent({
   setup () {
     const {
-      offlineReady,
       needRefresh,
       updateServiceWorker
     } = useRegisterSW()
 
     const close = async () => {
-      offlineReady.value = false
       needRefresh.value = false
     }
 
     return {
-      offlineReady,
       needRefresh,
       updateServiceWorker,
       close
@@ -53,16 +49,10 @@ export default defineComponent({
   border-radius: 4px
   z-index: 1
   text-align: left
+  background-color: #ffffff
   box-shadow: 3px 4px 5px 0px #8885
 
   & .message
     margin-bottom: 8px
-
-  & button
-    border: 1px solid #8885
-    outline: none
-    margin-right: 5px
-    border-radius: 2px
-    padding: 3px 10px
 
 </style>
