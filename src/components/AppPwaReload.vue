@@ -13,20 +13,33 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
 /* eslint-disable no-unused-vars, import/no-unresolved */
+import { defineComponent } from 'vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 
-const {
-  offlineReady,
-  needRefresh,
-  updateServiceWorker
-} = useRegisterSW()
+export default defineComponent({
+  setup () {
+    const {
+      offlineReady,
+      needRefresh,
+      updateServiceWorker
+    } = useRegisterSW()
 
-const close = async () => {
-  offlineReady.value = false
-  needRefresh.value = false
-}
+    const close = async () => {
+      offlineReady.value = false
+      needRefresh.value = false
+    }
+
+    return {
+      offlineReady,
+      needRefresh,
+      updateServiceWorker,
+      close
+    }
+  }
+})
+
 </script>
 
 <style lang="sass" scoped>
