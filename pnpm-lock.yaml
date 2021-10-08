@@ -1,6 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@iconify-json/mdi': ^1.0.4
   '@iconify/json': ^1.1.412
   '@typescript-eslint/eslint-plugin': 4.33.0
   '@vitejs/plugin-vue': ^1.9.3
@@ -31,6 +32,7 @@ dependencies:
   vue-router: 4.0.11_vue@3.2.20
 
 devDependencies:
+  '@iconify-json/mdi': 1.0.4
   '@iconify/json': 1.1.412
   '@typescript-eslint/eslint-plugin': 4.33.0_eslint@7.32.0+typescript@4.4.3
   '@vitejs/plugin-vue': 1.9.3_vite@2.6.5
@@ -1230,6 +1232,12 @@ packages:
 
   /@humanwhocodes/object-schema/1.2.0:
     resolution: {integrity: sha512-wdppn25U8z/2yiaT6YGquE6X8sSv7hNMWSXYSSU1jGv/yd6XqjXgTDJ8KP4NgjTXfJ3GbRjeeb8RTV7a/VpM+w==}
+    dev: true
+
+  /@iconify-json/mdi/1.0.4:
+    resolution: {integrity: sha512-T9BKqthWPPeH+ZNDgqahpwZf2Aj8j5CrIXGZhDs9zWDP9YfGBWu5lwyccDy2IjfMTyV1jFePHayAGaHz1PZfKA==}
+    dependencies:
+      '@iconify/types': 1.0.10
     dev: true
 
   /@iconify/json-tools/1.0.10:
