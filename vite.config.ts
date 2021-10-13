@@ -15,19 +15,26 @@ export default defineConfig({
     Components({
       resolvers: IconsResolver({
         prefix: 'icon'
-      }),
+      })
     }),
     Icons(),
     VitePWA({
+      registerType: 'autoUpdate',
       manifest: {
-        name: "SpotiBlind",
-        short_name: "SpotiBlind",
-        display: "fullscreen",
-        background_color: "#ffffff",
-        lang: "en",
-        scope: "/",
-        start_url: "/"
+        name: 'SpotiBlind',
+        short_name: 'SpotiBlind',
+        display: 'fullscreen',
+        background_color: '#ffffff',
+        lang: 'en',
+        scope: '/',
+        start_url: '/'
       }
     })
-  ]
+  ],
+  optimizeDeps: {
+    include: [
+      'vue',
+      'vue-router'
+    ]
+  }
 })
