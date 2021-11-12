@@ -4,6 +4,7 @@ import Library from './views/Library.vue'
 import Category from './views/Category.vue'
 import BlindTest from './views/BlindTest.vue'
 import Settings from './views/Settings.vue'
+import About from './views/About.vue'
 import NotFound from './views/NotFound.vue'
 
 export const routes = [
@@ -43,6 +44,11 @@ export const routes = [
         path: '/settings',
         name: 'Settings',
         component: Settings
+      },
+      {
+        path: '/about',
+        name: 'About',
+        component: About
       }
     ]
   },
