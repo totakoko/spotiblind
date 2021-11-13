@@ -295,7 +295,7 @@ export class SpotifyClient {
       method: 'PUT',
       body: JSON.stringify({
         device_ids: [deviceId],
-        play: true
+        play: false
       })
     })
     this.ensureValidResponse(res)
