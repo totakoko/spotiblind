@@ -24,6 +24,7 @@ specifiers:
   vue-eslint-parser: ^7.11.0
   vue-router: ^4.0.12
   vue-tsc: ^0.28.10
+  workbox-window: ^6.3.0
 
 dependencies:
   modern-css-reset: 1.4.0
@@ -51,6 +52,7 @@ devDependencies:
   vite-plugin-pwa: 0.11.3_vite@2.6.14
   vue-eslint-parser: 7.11.0_eslint@7.32.0
   vue-tsc: 0.28.10_typescript@4.4.4
+  workbox-window: 6.3.0
 
 packages:
 
