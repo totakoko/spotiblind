@@ -1,14 +1,5 @@
-import { SettingsService } from './services/settings'
-import { SpotifyClient } from './services/spotify'
-
 declare module '*.vue' {
-  import { DefineComponent } from '@vue/runtime-core'
+  import { DefineComponent } from '@vue/runtime-core' // eslint-disable-line import/no-unresolved
   const component: DefineComponent<{}, {}, any>
   export default component
-}
-declare module '@vue/runtime-core' {
-  export interface ComponentCustomProperties {
-    $settings: SettingsService
-    $spotifyClient: SpotifyClient
-  }
 }

@@ -1,5 +1,4 @@
-import { reactive } from '@vue/reactivity'
-import { watch } from 'vue'
+import { reactive, watch } from 'vue'
 import { debounce } from 'ts-debounce'
 
 const LOCAL_STORAGE_SETTINGS_KEY = 'spotiblind:settings'

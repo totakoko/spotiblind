@@ -1,4 +1,4 @@
-import { Ref, shallowRef } from '@vue/reactivity'
+import { Ref, shallowRef } from 'vue'
 
 const LOCAL_STORAGE_AUTHENTICATION_KEY = 'spotiblind:authentication'
 const LOCAL_STORAGE_PKCE_KEY = 'spotiblind:pkce'
