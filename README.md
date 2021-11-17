@@ -1,31 +1,26 @@
-<p align="center">
-  <a href="https://terminalizer.com">
-    <img src="/img/logo.png?raw=true" width="200"/>
-  </a>
-<h1>Spotiblind</h1>
-</p>
-
-# Spotiblind
+# SpotiBlind
 
 > A blind test web app using your Spotify device and the Spotify API
 
-https://spotiblind.totakoko.com
+Demo => https://spotiblind.totakoko.com
 
 ## Features
 
-- Start a blind test using any playlist in Spotify, including your private ones.
-- Configure your blind test
-
-
+- Start a blind test on your Spotify player with any playlist in Spotify, including your private ones.
+- Configure your blind test (number of tracks, listen and pause duration).
+- Have some fun!
 
 ## How does it work?
 
-Connect to the Spotify API.
-Issue commands via the API to your device (smartphone ?)
+The web application connects to the Spotify API and issue commands to control your local Spotify player.
 
 ## How to contribute?
 
 For anything, ideas or bugs, please create an issue.
+
+### Development
+
+See the [development guide](./DEVELOPMENT.md).
 
 ## License
 
