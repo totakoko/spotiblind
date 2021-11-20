@@ -1,4 +1,7 @@
-# SpotiBlind
+<div align="center">
+  <img src="./src/assets/spotiblind-logo.svg?raw=true" width="300" height="300" alt="Spotiblind">
+  <h1>SpotiBlind</h1>
+</div>
 
 > A blind test web app using your Spotify device and the Spotify API
 

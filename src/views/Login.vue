@@ -1,6 +1,11 @@
 <template>
   <div class="wrapper">
-    <img class="logo" :src="logoUrl" alt="SpotiBlind">
+    <div class="header">
+      <img class="logo" :src="logoUrl" alt="Spotiblind">
+      <h1 class="title">
+        SpotiBlind
+      </h1>
+    </div>
     <app-button class="login-btn" @click="$spotifyClient.redirectToSpotifyLogin()">
       <icon-mdi-spotify class="mr-2" />
       Login via Spotify
@@ -10,7 +15,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import logoUrl from '../assets/logo.png'
+import logoUrl from '../assets/spotiblind-logo.svg'
 
 export default defineComponent({
   data () {
@@ -34,9 +39,15 @@ export default defineComponent({
   justify-items: center
   padding: 2em
 
-.logo
-  max-width: 100%
+.header
   grid-row: 2
+  text-align: center
+
+.logo
+  width: 300px
+
+.title
+  margin-top: -1em
 
 .login-btn
   margin-top: 2em
