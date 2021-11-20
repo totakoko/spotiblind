@@ -9,7 +9,7 @@ build:
   stage: build
   script:
     # install pnpm
-    - curl -f https://get.pnpm.io/v6.14.js | node - add --global pnpm@6
+    - wget -qO- https://get.pnpm.io/v6.14.js | node - add --global pnpm@6
 
     # install dependencies
     - pnpm install --frozen-lockfile --prefer-offline --store-dir .pnpm-store
