@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "lint": "npx eslint src",
-    "serve": "vite preview"
+    "serve": "vite preview --port 8080"
   },
   "dependencies": {
     "modern-css-reset": "^1.4.0",
