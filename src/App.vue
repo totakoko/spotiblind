@@ -18,6 +18,7 @@ export default defineComponent({})
   height: 100vh
   display: flex
   flex-direction: column
+  background-color: #f5f5f5
 
 .u-spacer
   flex-grow: 1
