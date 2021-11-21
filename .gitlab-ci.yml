@@ -38,6 +38,7 @@ build-docker:
   dependencies:
     - build
   only:
+    - main
     - master
 
 deploy:
@@ -54,6 +55,7 @@ deploy:
   cache: {}
   dependencies: []
   only:
+    - main
     - master
 
 
