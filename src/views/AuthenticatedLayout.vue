@@ -1,6 +1,7 @@
 <template>
   <div class="navbar">
     <app-button dark tile class="navbar__brand" to="/">
+      <img :src="spotiblindLogoUrl" width="40" height="40" alt="Logo" style="margin-right: 8px">
       SpotiBlind
     </app-button>
 
@@ -26,9 +27,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
+import spotiblindLogoUrl from '../assets/spotiblind-logo.svg'
+
 export default defineComponent({
   data () {
     return {
+      spotiblindLogoUrl,
       authenticated: false
     }
   },
