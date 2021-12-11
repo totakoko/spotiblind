@@ -1,45 +1,12 @@
 import { Ref, shallowRef } from 'vue'
+import { generateRandomString, pkceChallengeFromVerifier } from './helpers'
+import { Category, Device, PKCE, Playlist, State } from './types'
 
 const LOCAL_STORAGE_AUTHENTICATION_KEY = 'spotiblind:authentication'
 const LOCAL_STORAGE_PKCE_KEY = 'spotiblind:pkce'
 
-interface PKCE {
-  codeVerifier: string
-  csrfToken: string
-}
-
-export interface SpotifyClientConfig {
-  clientId: string
-  redirectURI: string
-}
-
-interface State {
-  accessToken: string
-  refreshToken: string
-  accessTokenExpiration: number
-}
-
-export interface Category {
-  id: string
-  name: string
-  image: string
-}
-
-export interface Playlist {
-  id: string
-  name: string
-  image: string
-
-  tracks?: Track[]
-}
-
-export interface Track {
-  id: string
-  name: string
-  author: string
-  duration: number
-}
-
+// mandatory scopes for spotiblind to work:
+// update the player state and access private content
 const spotifyAPIScopes = [
   'user-read-playback-state',
   'user-modify-playback-state',
@@ -48,14 +15,29 @@ const spotifyAPIScopes = [
 
 const devicesCheckRoutineInterval = 5000
 
+export interface SpotifyClientConfig {
+  authURL?: string
+  apiURL?: string
+  locale?: string
+  clientId: string
+  redirectURI: string
+}
+
+export type PrivateSpotifyClientConfig = Required<SpotifyClientConfig>
+
 export class SpotifyClient {
-  private readonly config: SpotifyClientConfig
+  private readonly config: PrivateSpotifyClientConfig
   private state: State
   private devicesCheckRoutine: number = -1
-  public devices: Ref<any[]> = shallowRef([])
+
+  public devices: Ref<Device[]> = shallowRef([])
 
   constructor (config: SpotifyClientConfig) {
-    this.config = config
+    this.config = Object.assign({
+      apiURL: 'https://api.spotify.com/v1', // without trailing slash
+      authURL: 'https://accounts.spotify.com', // without trailing slash
+      locale: 'fr'
+    }, config)
 
     const state = localStorage.getItem(LOCAL_STORAGE_AUTHENTICATION_KEY)
     if (state !== null) {
@@ -123,7 +105,7 @@ export class SpotifyClient {
         return encodeURIComponent(key) + '=' + encodeURIComponent(value)
       }).join('&')
 
-    const url = `https://accounts.spotify.com/authorize?${searchParams}`
+    const url = `${this.config.authURL}/authorize?${searchParams}`
     window.location.assign(url)
   }
 
@@ -139,7 +121,7 @@ export class SpotifyClient {
         return encodeURIComponent(key) + '=' + encodeURIComponent(value)
       }).join('&')
 
-    const res = await fetch('https://accounts.spotify.com/api/token', {
+    const res = await fetch(`${this.config.authURL}/api/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -207,7 +189,7 @@ export class SpotifyClient {
       .map(([key, value]) => {
         return encodeURIComponent(key) + '=' + encodeURIComponent(value)
       }).join('&')
-    const res = await fetch('https://accounts.spotify.com/api/token', {
+    const res = await fetch(`${this.config.authURL}/api/token`, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
       },
@@ -229,7 +211,7 @@ export class SpotifyClient {
   }
 
   async getUserProfile (): Promise<any> {
-    const res = await fetch('https://api.spotify.com/v1/me', {
+    const res = await fetch(`${this.config.apiURL}/me`, {
       headers: this.getAuthHeaders(),
       method: 'GET'
     })
@@ -237,11 +219,11 @@ export class SpotifyClient {
   }
 
   async getPlaylist (playlistID: string): Promise<any> {
-    return await this.fetchAllItems(`https://api.spotify.com/v1/playlists/${playlistID}`, 'tracks', 100)
+    return await this.fetchAllItems(`${this.config.apiURL}/playlists/${playlistID}`, 'tracks', 100)
   }
 
   async getCategories (): Promise<Category[]> {
-    const body = await this.fetchAllItems('https://api.spotify.com/v1/browse/categories?locale=fr', 'categories', 50)
+    const body = await this.fetchAllItems(`${this.config.apiURL}/browse/categories?locale=${this.config.locale}`, 'categories', 50)
     return body.categories.items.map((category: any) => {
       return {
         id: category.id,
@@ -252,7 +234,7 @@ export class SpotifyClient {
   }
 
   async getCategory (categoryId: string): Promise<Category> {
-    const res = await fetch(`https://api.spotify.com/v1/browse/categories/${categoryId}?locale=fr`, {
+    const res = await fetch(`${this.config.apiURL}/browse/categories/${categoryId}?locale=${this.config.locale}`, {
       headers: this.getAuthHeaders()
     })
     this.ensureValidResponse(res)
@@ -260,7 +242,7 @@ export class SpotifyClient {
   }
 
   async getCategoryPlaylists (categoryId: string): Promise<Playlist[]> {
-    const body = await this.fetchAllItems(`https://api.spotify.com/v1/browse/categories/${categoryId}/playlists?country=fr`, 'playlists', 50)
+    const body = await this.fetchAllItems(`${this.config.apiURL}/browse/categories/${categoryId}/playlists?country=fr`, 'playlists', 50)
     return body.playlists.items.map((playlist: any) => {
       return {
         id: playlist.id,
@@ -271,7 +253,7 @@ export class SpotifyClient {
   }
 
   async getUserPlaylists (): Promise<Playlist[]> {
-    const body = await this.fetchAllItems('https://api.spotify.com/v1/me/playlists', 'items', 50)
+    const body = await this.fetchAllItems(`${this.config.apiURL}/me/playlists`, 'items', 50)
     return body.items.map((playlist: any) => {
       return {
         id: playlist.id,
@@ -281,8 +263,8 @@ export class SpotifyClient {
     })
   }
 
-  async getAvailableDevices (): Promise<any> {
-    const res = await fetch('https://api.spotify.com/v1/me/player/devices', {
+  async getAvailableDevices (): Promise<Device[]> {
+    const res = await fetch(`${this.config.apiURL}/me/player/devices`, {
       headers: this.getAuthHeaders()
     })
     this.ensureValidResponse(res)
@@ -290,7 +272,7 @@ export class SpotifyClient {
   }
 
   async transferPlayback (deviceId: string): Promise<void> {
-    const res = await fetch('https://api.spotify.com/v1/me/player', {
+    const res = await fetch(`${this.config.apiURL}/me/player`, {
       headers: this.getAuthHeaders(),
       method: 'PUT',
       body: JSON.stringify({
@@ -302,7 +284,7 @@ export class SpotifyClient {
   }
 
   async play (trackID: string, startPosition = 0): Promise<void> {
-    const res = await fetch('https://api.spotify.com/v1/me/player/play', {
+    const res = await fetch(`${this.config.apiURL}/me/player/play`, {
       headers: this.getAuthHeaders(),
       method: 'PUT',
       body: JSON.stringify({
@@ -314,7 +296,7 @@ export class SpotifyClient {
   }
 
   async pause (): Promise<void> {
-    const res = await fetch('https://api.spotify.com/v1/me/player/pause', {
+    const res = await fetch(`${this.config.apiURL}/me/player/pause`, {
       headers: this.getAuthHeaders(),
       method: 'PUT'
     })
@@ -351,14 +333,14 @@ export class SpotifyClient {
 
   async checkDevices (): Promise<void> {
     try {
-      const devices: any[] = this.devices.value = await this.getAvailableDevices()
+      const devices: Device[] = this.devices.value = await this.getAvailableDevices()
       if (devices.length === 0) {
         console.log('no device found')
         return
       }
 
       // if all devices are inactive, select the first
-      if (devices.every((device: any) => !(device.is_active as boolean))) {
+      if (devices.every(device => !device.is_active)) {
         await this.transferPlayback(devices[0].id)
       }
     } catch (error) {
@@ -384,32 +366,4 @@ export class SpotifyClient {
       Authorization: `Bearer ${this.state.accessToken}`
     }
   }
-}
-
-// helper functions for the PKCE workflow
-
-function generateRandomString (size: number): string {
-  const array = new Uint32Array(size)
-  window.crypto.getRandomValues(array)
-  return Array.from(array, dec => ('0' + dec.toString(16)).substr(-2)).join('')
-}
-
-async function sha256 (plain: string): Promise<ArrayBuffer> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(plain)
-  return await window.crypto.subtle.digest('SHA-256', data)
-}
-
-function base64urlencode (str: ArrayBuffer): string {
-  // Convert the ArrayBuffer to string using Uint8 array to convert to what btoa accepts.
-  // btoa accepts chars only within ascii 0-255 and base64 encodes them.
-  // Then convert the base64 encoded to base64url encoded
-  //   (replace + with -, replace / with _, trim trailing =)
-  return btoa(String.fromCharCode.apply(null, new Uint8Array(str) as any))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
-
-async function pkceChallengeFromVerifier (v: string): Promise<string> {
-  const hash = await sha256(v)
-  return base64urlencode(hash)
 }

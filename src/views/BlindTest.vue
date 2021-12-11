@@ -36,7 +36,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import AppProgress from '../components/AppProgress.vue'
-import { Category, Playlist, Track } from '../services/spotify'
+import { Category, Playlist, Track } from '../services/spotify/types'
 import { shuffleArray } from '../util/util'
 
 export default defineComponent({

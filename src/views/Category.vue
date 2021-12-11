@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Category, Playlist } from '../services/spotify'
+import { Category, Playlist } from '../services/spotify/types'
 
 interface Data {
   loaded: boolean

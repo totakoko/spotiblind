@@ -1,5 +1,5 @@
 import { SettingsService } from './services/settings'
-import { SpotifyClient } from './services/spotify'
+import { SpotifyClient } from './services/spotify/client'
 
 export {}
 

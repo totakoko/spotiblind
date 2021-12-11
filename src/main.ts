@@ -6,7 +6,7 @@ import App from './App.vue'
 import { routes } from './routes'
 
 import { SettingsService } from './services/settings'
-import { SpotifyClient } from './services/spotify'
+import { SpotifyClient } from './services/spotify/client'
 import { config } from './config'
 
 ;(async () => {

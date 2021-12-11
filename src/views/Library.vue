@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Category } from '../services/spotify'
+import { Category } from '../services/spotify/types'
 
 export default defineComponent({
   data: () => ({
