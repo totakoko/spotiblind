@@ -1,9 +1,8 @@
-
 export async function wait (ms: number): Promise<void> {
-  return await new Promise(resolve => setTimeout(resolve, ms))
+  await new Promise(resolve => setTimeout(resolve, ms))
 }
 
-export function shuffleArray<T extends any> (array: T[]): T[] {
+export function shuffleArray<T> (array: T[]): T[] {
   const newArr = []
   const source = array.slice()
   while (source.length > 0) {

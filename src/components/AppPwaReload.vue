@@ -13,7 +13,6 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable no-unused-vars, import/no-unresolved */
 import { defineComponent } from 'vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 

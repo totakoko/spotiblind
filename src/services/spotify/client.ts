@@ -75,7 +75,7 @@ export class SpotifyClient {
   }
 
   start (): void {
-    this.devicesCheckRoutine = setInterval(this.checkDevices.bind(this), devicesCheckRoutineInterval)
+    this.devicesCheckRoutine = setInterval(this.checkDevices, devicesCheckRoutineInterval)
   }
 
   stop (): void {
@@ -113,7 +113,7 @@ export class SpotifyClient {
     const searchParams = Object.entries({
       client_id: this.config.clientId,
       grant_type: 'authorization_code',
-      code: code,
+      code,
       redirect_uri: this.config.redirectURI,
       code_verifier: codeVerifier
     })
@@ -331,7 +331,7 @@ export class SpotifyClient {
     return body
   }
 
-  async checkDevices (): Promise<void> {
+  checkDevices = async (): Promise<void> => {
     try {
       const devices: Device[] = this.devices.value = await this.getAvailableDevices()
       if (devices.length === 0) {

@@ -13,9 +13,12 @@ export default defineConfig({
   plugins: [
     vue(),
     Components({
-      resolvers: IconsResolver({
-        prefix: 'icon'
-      })
+      resolvers: [
+        IconsResolver({
+          prefix: 'icon'
+        })
+      ],
+      dts: 'src/components.d.ts'
     }),
     Icons(),
     VitePWA({
@@ -30,11 +33,5 @@ export default defineConfig({
         start_url: '/'
       }
     })
-  ],
-  optimizeDeps: {
-    include: [
-      'vue',
-      'vue-router'
-    ]
-  }
+  ]
 })

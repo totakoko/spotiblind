@@ -6,34 +6,43 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:import/warnings',
     'plugin:import/typescript'
-    // '@vue/standard'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: './tsconfig.json',
     extraFileExtensions: ['.vue']
   },
-
-  // parserOptions: {
-  //   parser: 'babel-eslint'
-  // },
   rules: {
-    'vue/max-attributes-per-line': 0
+    'vue/max-attributes-per-line': 0,
+    'import/no-unresolved': ['error', {
+      ignore: [
+        '^virtual:',
+        '@vue/runtime-core'
+      ]
+    }],
+    'vue/multi-word-component-names': 0
   },
-  //   'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-  //   'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
-  // },
 
   overrides: [
     {
       files: ['*.vue'],
       parser: 'vue-eslint-parser',
       parserOptions: {
-        parser: '@typescript-eslint/parser',
+        parser: '@typescript-eslint/parser'
+      }
+    },
+    {
+      files: ['vite.config.ts'],
+      parserOptions: {
+        project: './tsconfig.node.json'
       },
+      rules: {
+        'import/no-unresolved': ['error', {
+          ignore: ['^unplugin*/*']
+        }]
+      }
     }
   ]
-
   // overrides: [
   //   {
   //     files: [
