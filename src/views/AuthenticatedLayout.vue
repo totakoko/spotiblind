@@ -19,7 +19,7 @@
     <router-view v-if="authenticated" />
   </div>
 
-  <div v-if="missingDevice" class="no-devices-found-banner">
+  <div v-if="!$spotifyClient.deviceReady.value" class="no-devices-found-banner">
     No Spotify devices found!
   </div>
 </template>
@@ -34,11 +34,6 @@ export default defineComponent({
     return {
       spotiblindLogoUrl,
       authenticated: false
-    }
-  },
-  computed: {
-    missingDevice () {
-      return this.$spotifyClient.devices.value.length === 0
     }
   },
   async created () {

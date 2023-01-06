@@ -1,4 +1,4 @@
-import { Ref, shallowRef } from 'vue'
+import { computed, ComputedRef, shallowRef, ShallowRef } from 'vue'
 import { generateRandomString, pkceChallengeFromVerifier } from './helpers'
 import { Category, Device, PKCE, Playlist, State } from './types'
 
@@ -30,7 +30,11 @@ export class SpotifyClient {
   private state: State
   private devicesCheckRoutine: number = -1
 
-  public devices: Ref<Device[]> = shallowRef([])
+  private readonly devices: ShallowRef<Device[]> = shallowRef<Device[]>([])
+
+  public readonly deviceReady: ComputedRef<boolean> = computed<boolean>(() => {
+    return this.devices.value.filter(d => d.is_active).length > 0
+  })
 
   constructor (config: SpotifyClientConfig) {
     this.config = Object.assign({

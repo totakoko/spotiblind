@@ -72,9 +72,6 @@ export default defineComponent({
     stepTimeout: -1
   }),
   computed: {
-    missingDevice (): boolean {
-      return this.$spotifyClient.devices.value.length === 0
-    },
     breadcrumbs () {
       const breadcrumbs = [
         {
@@ -111,7 +108,7 @@ export default defineComponent({
       return this.playlist?.tracks?.length === 0
     },
     canStartBlindTest (): boolean {
-      return !this.missingDevice && !this.emptyPlaylist
+      return this.$spotifyClient.deviceReady.value && !this.emptyPlaylist
     }
   },
   async created () {
