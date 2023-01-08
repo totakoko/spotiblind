@@ -79,7 +79,7 @@ export class SpotifyClient {
   }
 
   start (): void {
-    this.devicesCheckRoutine = setInterval(this.checkDevices, devicesCheckRoutineInterval)
+    this.devicesCheckRoutine = window.setInterval(this.checkDevices, devicesCheckRoutineInterval)
   }
 
   stop (): void {

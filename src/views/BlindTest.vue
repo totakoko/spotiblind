@@ -162,14 +162,14 @@ export default defineComponent({
       const startPosition = Math.floor(Math.random() * (track.duration - this.listenDuration))
       await this.$spotifyClient.play(track.id, startPosition)
       this.progressDuration = this.listenDuration
-      this.stepTimeout = setTimeout(this.stepPause.bind(this), this.listenDuration, track)
+      this.stepTimeout = window.setTimeout(this.stepPause.bind(this), this.listenDuration, track)
     },
     async stepPause (track: Track) {
       await this.$spotifyClient.pause()
       this.pastTracks.push(track)
       if (this.pendingTracks.length > 0) {
         this.progressDuration = this.pauseDuration
-        this.stepTimeout = setTimeout(this.stepTrack.bind(this), this.pauseDuration)
+        this.stepTimeout = window.setTimeout(this.stepTrack.bind(this), this.pauseDuration)
       } else {
         this.finished = true
         window.removeEventListener('beforeunload', this.onBeforeLeaving)

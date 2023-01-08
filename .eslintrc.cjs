@@ -20,7 +20,13 @@ module.exports = {
         '@vue/runtime-core'
       ]
     }],
-    'vue/multi-word-component-names': 0
+    'vue/multi-word-component-names': 0,
+    '@typescript-eslint/no-misused-promises': [
+      'error',
+      {
+        'checksVoidReturn': false
+      }
+    ]
   },
 
   overrides: [
