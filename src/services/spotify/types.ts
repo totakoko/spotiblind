@@ -27,7 +27,7 @@ export interface Playlist {
 export interface Track {
   id: string
   name: string
-  author: string
+  authors: string[]
   duration: number
 }
 
