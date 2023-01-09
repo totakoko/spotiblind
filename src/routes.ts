@@ -6,6 +6,9 @@ import BlindTest from './views/BlindTest.vue'
 import Settings from './views/Settings.vue'
 import About from './views/About.vue'
 import NotFound from './views/NotFound.vue'
+import Debug from './views/Debug.vue'
+
+const devMode = import.meta.env.DEV
 
 export const routes = [
   {
@@ -13,6 +16,14 @@ export const routes = [
     name: 'Login',
     component: Login
   },
+  ...(devMode
+    ? [{
+        path: '/debug',
+        name: 'Debug',
+        component: Debug
+      }
+      ]
+    : []),
   {
     path: '/',
     component: AuthenticatedLayout,
