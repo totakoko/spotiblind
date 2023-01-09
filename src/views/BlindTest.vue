@@ -35,12 +35,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import AppProgress from '../components/AppProgress.vue'
 import { Category, Playlist, Track } from '../services/spotify/types'
 import { shuffleArray } from '../util/util'
 
 export default defineComponent({
-  components: { AppProgress },
   beforeRouteLeave () {
     if (this.started) {
       const answer = window.confirm('Do you really want to leave?')

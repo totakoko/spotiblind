@@ -78,12 +78,7 @@ export default defineComponent({
   transition: .3s
   min-width: 48px
   position: relative
-  // height: 100%
   cursor: pointer
-
-  // border: 1px solid black
-  // &:hover
-  //   background-color: #e7e7e7
 
   &[disabled]
     cursor: not-allowed
