@@ -1,6 +1,6 @@
 import { computed, ComputedRef, shallowRef, ShallowRef } from 'vue'
 import { generateRandomString, pkceChallengeFromVerifier } from './helpers'
-import { Category, Device, PKCE, Playlist, State } from './types'
+import { Category, Device, PKCE, Playlist, State, Track } from './types'
 
 const LOCAL_STORAGE_AUTHENTICATION_KEY = 'spotiblind:authentication'
 const LOCAL_STORAGE_PKCE_KEY = 'spotiblind:pkce'
@@ -223,7 +223,22 @@ export class SpotifyClient {
   }
 
   async getPlaylist (playlistID: string): Promise<any> {
-    return await this.fetchAllItems(`${this.config.apiURL}/playlists/${playlistID}`, 'tracks', 100)
+    const playlist = await this.fetchAllItems(`${this.config.apiURL}/playlists/${playlistID}`, 'tracks', 100)
+    return {
+      id: playlist.id,
+      name: playlist.name,
+      image: playlist.images[0]?.url,
+      tracks: playlist.tracks.items
+        .filter((track: any) => track.track !== null) // some tracks may be null...
+        .map((track: any): Track => {
+          return {
+            id: track.track.id,
+            name: track.track.name,
+            artists: track.track.artists.map((artist: any) => artist.name),
+            duration: track.track.duration_ms
+          }
+        })
+    }
   }
 
   async getCategories (): Promise<Category[]> {

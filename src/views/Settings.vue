@@ -9,34 +9,28 @@
 
     <div class="form-field">
       <label for="tracks">Number of tracks per blind test</label>
-      <app-input id="tracks" v-model.number="settings.numberOfTracks" type="number" min="1" max="100" />
+      <app-input id="tracks" v-model.number="settingsService.settings.numberOfTracks" type="number" min="1" max="100" />
     </div>
     <div class="form-field">
       <label for="listen">Listen duration per track (in seconds)</label>
-      <app-input id="listen" v-model.number="settings.listenDuration" type="number" min="1" max="90" />
+      <app-input id="listen" v-model.number="settingsService.settings.listenDuration" type="number" min="1" max="90" />
     </div>
     <div class="form-field">
       <label for="pause">Pause between tracks (in seconds)</label>
-      <app-input id="pause" v-model.number="settings.pauseDuration" type="number" min="0" max="60" />
+      <app-input id="pause" v-model.number="settingsService.settings.pauseDuration" type="number" min="0" max="60" />
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { inject } from 'vue'
+import { SETTINGS_SERVICE } from '../injects'
 
-export default defineComponent({
-  data () {
-    return {
-      settings: this.$settings.settings
-    }
-  },
-  methods: {
-    loadDefaultSettings () {
-      this.$settings.reset()
-    }
-  }
-})
+const settingsService = inject(SETTINGS_SERVICE)!
+
+function loadDefaultSettings () {
+  settingsService.reset()
+}
 </script>
 
 <style lang="sass" scoped>

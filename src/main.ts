@@ -5,11 +5,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import { routes } from './routes'
 
+import { config } from './config'
+import { SETTINGS_SERVICE, SPOTIFY_CLIENT } from './injects'
 import { SettingsService } from './services/settings'
 import { SpotifyClient } from './services/spotify/client'
-import { config } from './config'
 
-;(async () => {
+(async () => {
   const settings = new SettingsService()
   const spotifyClient = new SpotifyClient(config)
   await spotifyClient.init()
@@ -21,8 +22,8 @@ import { config } from './config'
 
   const app = createApp(App)
   app.use(router)
-  app.config.globalProperties.$settings = settings
-  app.config.globalProperties.$spotifyClient = spotifyClient
+  app.provide(SETTINGS_SERVICE, settings)
+  app.provide(SPOTIFY_CLIENT, spotifyClient)
   app.mount('#app')
 })().catch(e => {
   console.error(e)

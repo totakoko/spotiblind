@@ -18,38 +18,36 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import { Category } from '../services/spotify/types'
+<script lang="ts" setup>
+import { inject } from 'vue'
+import { SPOTIFY_CLIENT } from '../injects'
+import { Category, Playlist } from '../services/spotify/types'
 
-export default defineComponent({
-  data: () => ({
-    loaded: false,
-    categories: [] as Category[],
-    playlists: [] as Category[]
-  }),
-  async created () {
-    await Promise.all([
-      (async () => {
-        this.categories = await this.$spotifyClient.getCategories()
-        this.categories.forEach(category => {
-          if (category.name.includes('/')) {
-            category.name = category.name.replace(/\//, ' / ')
-          }
-        })
-      })(),
-      (async () => {
-        this.playlists = await this.$spotifyClient.getUserPlaylists()
-        this.playlists.forEach(category => {
-          if (category.name.includes('/')) {
-            category.name = category.name.replace(/\//, ' / ')
-          }
-        })
-      })()
-    ])
-    this.loaded = true
-  }
-})
+const spotifyClient = inject(SPOTIFY_CLIENT)!
+
+let loaded = false
+let categories: Category[] = []
+let playlists: Playlist[] = []
+
+await Promise.all([
+  (async () => {
+    categories = await spotifyClient.getCategories()
+    categories.forEach(category => {
+      if (category.name.includes('/')) {
+        category.name = category.name.replace(/\//, ' / ')
+      }
+    })
+  })(),
+  (async () => {
+    playlists = await spotifyClient.getUserPlaylists()
+    playlists.forEach(category => {
+      if (category.name.includes('/')) {
+        category.name = category.name.replace(/\//, ' / ')
+      }
+    })
+  })()
+])
+loaded = true
 </script>
 
 <style lang="sass" scoped>

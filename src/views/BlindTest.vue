@@ -33,160 +33,142 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { computed, inject, onUnmounted } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
+import { SETTINGS_SERVICE, SPOTIFY_CLIENT } from '../injects'
 import { Category, Playlist, Track } from '../services/spotify/types'
 import { shuffleArray } from '../util/util'
 
-export default defineComponent({
-  beforeRouteLeave () {
-    if (this.started) {
-      const answer = window.confirm('Do you really want to leave?')
-      if (!answer) {
-        return false
+const settings = inject(SETTINGS_SERVICE)!
+const spotifyClient = inject(SPOTIFY_CLIENT)!
+
+const props = defineProps<{
+  categoryId?: string
+  playlistId: string
+}>()
+
+let loaded = false
+let playlist: Playlist | null = null
+let category: Category | null = null
+
+let started = false
+let pendingTracks: Track[] = []
+let pastTracks: Track[] = []
+let progressDuration = -1
+let finished = false
+let stepTimeout = -1
+
+// eslint-disable-next-line no-unused-vars
+const breadcrumbs = computed(() => {
+  const breadcrumbs = [
+    {
+      text: 'Categories',
+      to: '/'
+    }
+  ]
+  if (category && playlist) {
+    breadcrumbs.push(
+      {
+        text: category.name,
+        to: `/categories/${props.categoryId}`
+      },
+      {
+        text: playlist.name,
+        to: `/categories/${props.categoryId}/playlists/${props.playlistId}`
       }
-    }
-  },
-  props: {
-    categoryId: {
-      type: String,
-      default: null
-    },
-    playlistId: {
-      type: String,
-      required: true
-    }
-  },
-  data: () => ({
-    loaded: false,
-    playlist: null as Playlist | null,
-    category: null as Category | null,
+    )
+  } else if (playlist) {
+    breadcrumbs.push({
+      text: playlist.name,
+      to: `/playlists/${props.playlistId}`
+    })
+  }
+  return breadcrumbs
+})
 
-    started: false,
-    pendingTracks: [] as Track[],
-    pastTracks: [] as Track[],
-    progressDuration: -1,
-    finished: false,
-    stepTimeout: -1
-  }),
-  computed: {
-    breadcrumbs () {
-      const breadcrumbs = [
-        {
-          text: 'Categories',
-          to: '/'
-        }
-      ]
-      if (this.category && this.playlist) {
-        breadcrumbs.push(
-          {
-            text: this.category.name,
-            to: `/categories/${this.categoryId}`
-          },
-          {
-            text: this.playlist.name,
-            to: `/categories/${this.categoryId}/playlists/${this.playlistId}`
-          }
-        )
-      } else if (this.playlist) {
-        breadcrumbs.push({
-          text: this.playlist.name,
-          to: `/playlists/${this.playlistId}`
-        })
-      }
-      return breadcrumbs
-    },
-    listenDuration (): number {
-      return this.$settings.settings.listenDuration * 1000
-    },
-    pauseDuration (): number {
-      return this.$settings.settings.pauseDuration * 1000
-    },
-    emptyPlaylist (): boolean {
-      return this.playlist?.tracks?.length === 0
-    },
-    canStartBlindTest (): boolean {
-      return this.$spotifyClient.deviceReady.value && !this.emptyPlaylist
-    }
-  },
-  async created () {
-    await Promise.all([
-      this.$spotifyClient.checkDevices(),
-      (async () => {
-        if (this.categoryId) {
-          this.category = await this.$spotifyClient.getCategory(this.categoryId)
-        }
-      })(),
-      (async () => {
-        const playlist = await this.$spotifyClient.getPlaylist(this.playlistId)
-        this.playlist = {
-          id: playlist.id,
-          name: playlist.name,
-          image: playlist.images[0]?.url,
-          tracks: playlist.tracks.items
-            .filter((track: any) => !!track.track) // some tracks may be null...
-            .map((track: any) => {
-              return {
-                id: track.track.id,
-                name: track.track.name,
-                artists: track.track.artists.map((artist: any) => artist.name),
-                duration: track.track.duration_ms
-              } as Track
-            })
-        }
-      })()
-    ])
-    this.loaded = true
-  },
-  unmounted () {
-    if (this.started && !this.finished) {
-      clearTimeout(this.stepTimeout)
-      this.$spotifyClient.pause().catch(() => {})
-      window.removeEventListener('beforeunload', this.onBeforeLeaving)
-    }
-  },
-  methods: {
-    async startBlindTest () {
-      this.started = true
-      this.finished = false
-      this.pendingTracks = shuffleArray(this.playlist!.tracks!).slice(0, this.$settings.settings.numberOfTracks)
-      this.pastTracks = []
-      window.addEventListener('beforeunload', this.onBeforeLeaving)
-      await this.stepTrack()
-    },
+const listenDuration = computed(() => {
+  return settings.settings.listenDuration * 1000
+})
+const pauseDuration = computed(() => {
+  return settings.settings.pauseDuration * 1000
+})
+const emptyPlaylist = computed(() => {
+  return playlist?.tracks?.length === 0
+})
+const canStartBlindTest = computed(() => {
+  return spotifyClient.deviceReady.value && !emptyPlaylist.value
+})
 
-    async stepTrack () {
-      const [track] = this.pendingTracks.splice(0, 1)
-      const startPosition = Math.floor(Math.random() * (track.duration - this.listenDuration))
-      await this.$spotifyClient.play(track.id, startPosition)
-      this.progressDuration = this.listenDuration
-      this.stepTimeout = window.setTimeout(this.stepPause.bind(this), this.listenDuration, track)
-    },
-    async stepPause (track: Track) {
-      await this.$spotifyClient.pause()
-      this.pastTracks.push(track)
-      if (this.pendingTracks.length > 0) {
-        this.progressDuration = this.pauseDuration
-        this.stepTimeout = window.setTimeout(this.stepTrack.bind(this), this.pauseDuration)
-      } else {
-        this.finished = true
-        window.removeEventListener('beforeunload', this.onBeforeLeaving)
-      }
-    },
-
-    async playTrack (trackId: string): Promise<void> {
-      await this.$spotifyClient.play(trackId)
-    },
-
-    // show a confirm dialog to the user
-    onBeforeLeaving: (event: BeforeUnloadEvent) => {
-      // Cancel the event
-      event.preventDefault()
-      // Chrome requires returnValue to be set
-      event.returnValue = ''
+onBeforeRouteLeave(() => {
+  if (started) {
+    const answer = window.confirm('Do you really want to leave?')
+    if (!answer) {
+      return false
     }
   }
 })
+
+onUnmounted(() => {
+  if (started && !finished) {
+    clearTimeout(stepTimeout)
+    spotifyClient.pause().catch(() => {})
+    window.removeEventListener('beforeunload', onBeforeLeaving)
+  }
+})
+
+await Promise.all([
+  spotifyClient.checkDevices(),
+  (async () => {
+    if (props.categoryId) {
+      category = await spotifyClient.getCategory(props.categoryId)
+    }
+  })(),
+  (async () => {
+    playlist = await spotifyClient.getPlaylist(props.playlistId)
+  })()
+])
+loaded = true
+
+async function startBlindTest () {
+  started = true
+  finished = false
+  pendingTracks = shuffleArray(playlist!.tracks!).slice(0, settings.settings.numberOfTracks)
+  pastTracks = []
+  window.addEventListener('beforeunload', onBeforeLeaving)
+  await stepTrack()
+}
+
+async function stepTrack () {
+  const [track] = pendingTracks.splice(0, 1)
+  const startPosition = Math.floor(Math.random() * (track.duration - listenDuration.value))
+  await spotifyClient.play(track.id, startPosition)
+  progressDuration = listenDuration.value
+  stepTimeout = window.setTimeout(stepPause, listenDuration.value, track)
+}
+async function stepPause (track: Track) {
+  await spotifyClient.pause()
+  pastTracks.push(track)
+  if (pendingTracks.length > 0) {
+    progressDuration = pauseDuration.value
+    stepTimeout = window.setTimeout(stepTrack, pauseDuration.value)
+  } else {
+    finished = true
+    window.removeEventListener('beforeunload', onBeforeLeaving)
+  }
+}
+
+async function playTrack (trackId: string): Promise<void> {
+  await spotifyClient.play(trackId)
+}
+
+// show a confirm dialog to the user
+function onBeforeLeaving (event: BeforeUnloadEvent) {
+  // Cancel the event
+  event.preventDefault()
+  // Chrome requires returnValue to be set
+  event.returnValue = ''
+}
 </script>
 
 <style lang="sass" scoped>

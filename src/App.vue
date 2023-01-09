@@ -3,12 +3,6 @@
   <app-pwa-reload />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({})
-</script>
-
 <style lang="sass">
 #app
   font-family: Avenir, Helvetica, Arial, sans-serif

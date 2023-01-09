@@ -6,27 +6,26 @@
         SpotiBlind
       </h1>
     </div>
-    <app-button class="login-btn" @click="$spotifyClient.redirectToSpotifyLogin()">
+    <app-button class="login-btn" @click="spotifyClient.redirectToSpotifyLogin()">
       <icon-mdi-spotify class="mr-2" />
       Login via Spotify
     </app-button>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { inject, onBeforeMount } from 'vue'
+import { useRouter } from 'vue-router'
 import logoUrl from '../assets/spotiblind-logo.svg'
+import { SPOTIFY_CLIENT } from '../injects'
 
-export default defineComponent({
-  data () {
-    return {
-      logoUrl
-    }
-  },
-  async beforeCreate () {
-    if (this.$spotifyClient.isLoggedIn()) {
-      await this.$router.push('/')
-    }
+const spotifyClient = inject(SPOTIFY_CLIENT)!
+
+const router = useRouter()
+
+onBeforeMount(async () => {
+  if (spotifyClient.isLoggedIn()) {
+    await router.push('/')
   }
 })
 </script>

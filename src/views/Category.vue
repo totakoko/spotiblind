@@ -1,55 +1,47 @@
 <template>
-  <div class="library">
+  <div v-if="loaded" class="library">
     <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/categories/${categoryId}/playlists/${playlist.id}`" :title="playlist.name" />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { computed, inject } from 'vue'
+import { SPOTIFY_CLIENT } from '../injects'
 import { Category, Playlist } from '../services/spotify/types'
 
-interface Data {
-  loaded: boolean
-  category: Category | null
-  playlists: Playlist[]
-}
+const spotifyClient = inject(SPOTIFY_CLIENT)!
 
-export default defineComponent({
-  props: {
-    categoryId: {
-      type: String,
-      required: true
+const props = defineProps<{
+  categoryId: string
+}>()
+
+let loaded = false
+let category: Category | null = null
+let playlists: Playlist[] = []
+
+// eslint-disable-next-line no-unused-vars
+const breadcrumbs = computed(() => {
+  return [
+    {
+      text: 'Categories',
+      to: '/'
+    },
+    {
+      text: category?.name,
+      to: `/categories/${props.categoryId}`
     }
-  },
-  data: () => ({
-    loaded: false,
-    category: null,
-    playlists: []
-  } as Data),
-  computed: {
-    breadcrumbs (): any[] {
-      return [
-        {
-          text: 'Categories',
-          to: '/'
-        },
-        {
-          text: this.category?.name,
-          to: `/categories/${this.categoryId}`
-        }
-      ]
-    }
-  },
-  async created () {
-    const [category, playlists] = await Promise.all([
-      this.$spotifyClient.getCategory(this.categoryId),
-      this.$spotifyClient.getCategoryPlaylists(this.categoryId)
-    ])
-    this.category = category
-    this.playlists = playlists
-    this.loaded = true
-  }
+  ]
 })
+
+await Promise.all([
+  (async () => {
+    category = await spotifyClient.getCategory(props.categoryId)
+  })(),
+  (async () => {
+    playlists = await spotifyClient.getCategoryPlaylists(props.categoryId)
+  })()
+])
+loaded = true
 </script>
 
 <style lang="sass" scoped>

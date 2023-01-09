@@ -19,41 +19,37 @@
     <router-view v-if="authenticated" />
   </div>
 
-  <div v-if="!$spotifyClient.deviceReady.value" class="no-devices-found-banner">
+  <div v-if="!spotifyClient.deviceReady.value" class="no-devices-found-banner">
     No Spotify devices found!
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-
+<script lang="ts" setup>
+import { inject, onUnmounted } from 'vue'
+import { SPOTIFY_CLIENT } from '../injects'
 import spotiblindLogoUrl from '../assets/spotiblind-logo.svg'
+import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  data () {
-    return {
-      spotiblindLogoUrl,
-      authenticated: false
-    }
-  },
-  async created () {
-    if (!this.$spotifyClient.isLoggedIn()) {
-      await this.$router.push('/login')
-      return
-    }
-    this.authenticated = true
-    this.$spotifyClient.start()
-  },
-  unmounted () {
-    this.$spotifyClient.stop()
-  },
-  methods: {
-    async logout () {
-      this.$spotifyClient.logout()
-      await this.$router.push('/login')
-    }
-  }
-})
+const router = useRouter()
+const spotifyClient = inject(SPOTIFY_CLIENT)!
+
+let authenticated = false
+
+if (!spotifyClient.isLoggedIn()) {
+  await router.push('/login')
+} else {
+  authenticated = true
+  spotifyClient.start()
+
+  onUnmounted(() => {
+    spotifyClient.stop()
+  })
+}
+
+async function logout () {
+  spotifyClient.logout()
+  await router.push('/login')
+}
 </script>
 
 <style lang="sass">
@@ -79,5 +75,4 @@ export default defineComponent({
   text-align: center
   color: white
   padding: .5em 0
-
 </style>
