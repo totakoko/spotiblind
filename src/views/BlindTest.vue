@@ -158,7 +158,6 @@ async function stepTrack () {
   await spotifyClient.play(track.id, startPosition)
   state.progressDuration = listenDuration.value
   stepTimeout = window.setTimeout(stepPause, state.progressDuration, track)
-  console.log('STARTSTEP')
 }
 async function stepPause (track: Track) {
   await spotifyClient.pause()

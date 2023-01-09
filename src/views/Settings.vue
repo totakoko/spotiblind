@@ -3,7 +3,7 @@
     <h1>Settings</h1>
     <p>These settings are stored on a per-device basis. Connecting from another device will load the default settings.</p>
 
-    <app-button @click="loadDefaultSettings()">
+    <app-button @click="settingsService.reset()">
       Reset settings
     </app-button>
 
@@ -27,10 +27,6 @@ import { inject } from 'vue'
 import { SETTINGS_SERVICE } from '../injects'
 
 const settingsService = inject(SETTINGS_SERVICE)!
-
-function loadDefaultSettings () {
-  settingsService.reset()
-}
 </script>
 
 <style lang="sass" scoped>
