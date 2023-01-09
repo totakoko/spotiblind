@@ -7,7 +7,7 @@
       </h1>
     </div>
 
-    <div v-if="emptyPlaylist" class="">
+    <div v-if="emptyPlaylist">
       This playlist does not contain any song!
     </div>
 
@@ -144,14 +144,14 @@ async function stepTrack () {
   const startPosition = Math.floor(Math.random() * (track.duration - listenDuration.value))
   await spotifyClient.play(track.id, startPosition)
   progressDuration = listenDuration.value
-  stepTimeout = window.setTimeout(stepPause, listenDuration.value, track)
+  stepTimeout = window.setTimeout(stepPause, progressDuration, track)
 }
 async function stepPause (track: Track) {
   await spotifyClient.pause()
   pastTracks.push(track)
   if (pendingTracks.length > 0) {
     progressDuration = pauseDuration.value
-    stepTimeout = window.setTimeout(stepTrack, pauseDuration.value)
+    stepTimeout = window.setTimeout(stepTrack, progressDuration)
   } else {
     finished = true
     window.removeEventListener('beforeunload', onBeforeLeaving)

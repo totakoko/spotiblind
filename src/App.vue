@@ -1,5 +1,7 @@
 <template>
-  <router-view />
+  <Suspense>
+    <router-view />
+  </Suspense>
   <app-pwa-reload />
 </template>
 

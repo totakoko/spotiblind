@@ -229,7 +229,7 @@ export class SpotifyClient {
       name: playlist.name,
       image: playlist.images[0]?.url,
       tracks: playlist.tracks.items
-        .filter((track: any) => track.track !== null) // some tracks may be null...
+        .filter((track: any) => track.track !== null) // some tracks may be null
         .map((track: any): Track => {
           return {
             id: track.track.id,
@@ -262,24 +262,28 @@ export class SpotifyClient {
 
   async getCategoryPlaylists (categoryId: string): Promise<Playlist[]> {
     const body = await this.fetchAllItems(`${this.config.apiURL}/browse/categories/${categoryId}/playlists?country=fr`, 'playlists', 50)
-    return body.playlists.items.map((playlist: any) => {
-      return {
-        id: playlist.id,
-        name: playlist.name,
-        image: playlist.images[0].url
-      }
-    })
+    return body.playlists.items
+      .filter((playlist: any) => playlist !== null) // some playlist may be null
+      .map((playlist: any) => {
+        return {
+          id: playlist.id,
+          name: playlist.name,
+          image: playlist.images[0].url
+        }
+      })
   }
 
   async getUserPlaylists (): Promise<Playlist[]> {
     const body = await this.fetchAllItems(`${this.config.apiURL}/me/playlists`, 'items', 50)
-    return body.items.map((playlist: any) => {
-      return {
-        id: playlist.id,
-        name: playlist.name,
-        image: playlist.images[0]?.url
-      }
-    })
+    return body.items
+      .filter((playlist: any) => playlist !== null) // some playlists may be null
+      .map((playlist: any) => {
+        return {
+          id: playlist.id,
+          name: playlist.name,
+          image: playlist.images[0]?.url
+        }
+      })
   }
 
   async getAvailableDevices (): Promise<Device[]> {

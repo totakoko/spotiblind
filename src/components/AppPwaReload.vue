@@ -12,29 +12,17 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 
-export default defineComponent({
-  setup () {
-    const {
-      needRefresh,
-      updateServiceWorker
-    } = useRegisterSW()
+const {
+  needRefresh,
+  updateServiceWorker
+} = useRegisterSW()
 
-    const close = async () => {
-      needRefresh.value = false
-    }
-
-    return {
-      needRefresh,
-      updateServiceWorker,
-      close
-    }
-  }
-})
-
+async function close () {
+  needRefresh.value = false
+}
 </script>
 
 <style lang="sass" scoped>
@@ -53,5 +41,4 @@ export default defineComponent({
 
   & .message
     margin-bottom: 8px
-
 </style>
