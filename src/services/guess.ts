@@ -20,7 +20,7 @@ export class TrackGuesser {
   // TODO mettre une ref publique pour contenir le statut
 
   constructor (track: Track) {
-    this.name = normalize(track.name).replace(/ \(feat\. .*\)/, '')
+    this.name = normalize(cleanTrackName(track.name))
     this.artists = track.artists.map(artist => normalize(artist))
   }
 
@@ -48,4 +48,11 @@ export class TrackGuesser {
 // allow 1 error every 10 characters
 function getDistanceThreshold (guess: string): number {
   return Math.floor(guess.length / 10)
+}
+
+export function cleanTrackName (trackName: string): string {
+  return trackName
+    .replace(/ \(feat\. .*\)$/i, '')
+    .replace(/ - Radio (edit|version).*$/i, '')
+    .replace(/ - Remastered.*/i, '')
 }

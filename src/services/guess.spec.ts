@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { TrackGuesser } from './guess'
+import { cleanTrackName, TrackGuesser } from './guess'
 import { Track } from './spotify/types'
 
 const commonOptions = {
@@ -23,13 +23,18 @@ const track3: Track = {
   ...commonOptions
 }
 
+describe('cleanTrackName()', () => {
+  it('remove junk', () => {
+    expect(cleanTrackName('Memories (feat. Kid Cudi)')).toEqual('Memories')
+    expect(cleanTrackName('Memories - radio edit')).toEqual('Memories')
+    expect(cleanTrackName('Memories - radio version')).toEqual('Memories')
+    expect(cleanTrackName('Memories - Remastered')).toEqual('Memories')
+    expect(cleanTrackName('Memories - Remastered 2021')).toEqual('Memories')
+  })
+})
+
 describe('TrackGuesser#guess()', () => {
-  it('remove the feats from the track name', () => {
-    expect(new TrackGuesser(track2).guess('memories')).toEqual([
-      {
-        type: 'name'
-      }
-    ])
+  it('remove the additional information from the track name', () => {
     expect(new TrackGuesser(track2).guess('memories')).toEqual([
       {
         type: 'name'
