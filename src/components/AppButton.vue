@@ -69,6 +69,7 @@ export default defineComponent({
 <style lang="sass" scoped>
 .button
   display: inline-flex
+  justify-content: center
   align-items: center
   padding: 8px
   border: none
