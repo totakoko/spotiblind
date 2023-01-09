@@ -14,6 +14,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "fastest-levenshtein": "^1.0.16",
     "modern-css-reset": "^1.4.0",
     "ts-debounce": "^3.0.0",
     "vue": "^3.2.45",

@@ -18,7 +18,7 @@
     <template v-else>
       <transition-group name="fade">
         <div v-for="(track, index) in pastTracks" :key="index" class="blindtest__track">
-          {{ track.authors[0] }} : {{ track.name }}
+          {{ track.artists[0] }} : {{ track.name }}
           <app-button v-if="finished" tile title="Play this track" @click="playTrack(track.id)">
             <icon-mdi-play-circle />
           </app-button>
@@ -131,7 +131,7 @@ export default defineComponent({
               return {
                 id: track.track.id,
                 name: track.track.name,
-                authors: track.track.artists.map((artist: any) => artist.name),
+                artists: track.track.artists.map((artist: any) => artist.name),
                 duration: track.track.duration_ms
               } as Track
             })

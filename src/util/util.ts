@@ -12,3 +12,7 @@ export function shuffleArray<T> (array: T[]): T[] {
   }
   return newArr
 }
+
+export function normalize (str: string | null | undefined): string {
+  return str == null ? '' : str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}

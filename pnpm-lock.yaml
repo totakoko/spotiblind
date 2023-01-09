@@ -10,6 +10,7 @@ specifiers:
   eslint-plugin-n: ^15.0.0
   eslint-plugin-promise: ^6.0.0
   eslint-plugin-vue: ^9.8.0
+  fastest-levenshtein: ^1.0.16
   modern-css-reset: ^1.4.0
   sass: ^1.57.1
   ts-debounce: ^3.0.0
@@ -26,6 +27,7 @@ specifiers:
   workbox-window: ^6.5.4
 
 dependencies:
+  fastest-levenshtein: 1.0.16
   modern-css-reset: 1.4.0
   ts-debounce: 3.0.0
   vue: 3.2.45
@@ -2805,6 +2807,11 @@ packages:
   /fast-levenshtein/2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
     dev: true
+
+  /fastest-levenshtein/1.0.16:
+    resolution: {integrity: sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==}
+    engines: {node: '>= 4.9.1'}
+    dev: false
 
   /fastq/1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}
