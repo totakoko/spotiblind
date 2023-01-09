@@ -1,5 +1,5 @@
 <template>
-  <input :type="type" :class="classes" :value="modelValue" @input="triggerUpdate($event)">
+  <input :type="type" class="input" :value="modelValue" @input="triggerUpdate($event)">
 </template>
 
 <script lang="ts">
@@ -16,17 +16,6 @@ export default defineComponent({
     }
   },
   emits: ['update:modelValue'],
-  data () {
-    return {
-      loading: false
-    }
-  },
-  computed: {
-    classes () {
-      const classes: string[] = ['input']
-      return classes
-    }
-  },
   methods: {
     triggerUpdate (event: Event): void {
       this.$emit('update:modelValue', (event.target as HTMLInputElement)!.value)
