@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onUnmounted } from 'vue'
+import { inject, onUnmounted, ref } from 'vue'
 import { SPOTIFY_CLIENT } from '../injects'
 import spotiblindLogoUrl from '../assets/spotiblind-logo.svg'
 import { useRouter } from 'vue-router'
@@ -33,12 +33,12 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const spotifyClient = inject(SPOTIFY_CLIENT)!
 
-let authenticated = false
+const authenticated = ref(false)
 
 if (!spotifyClient.isLoggedIn()) {
   await router.push('/login')
 } else {
-  authenticated = true
+  authenticated.value = true
   spotifyClient.start()
 
   onUnmounted(() => {

@@ -1,11 +1,11 @@
 <template>
-  <div v-if="loaded" class="library">
-    <app-button v-for="playlist in playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/categories/${categoryId}/playlists/${playlist.id}`" :title="playlist.name" />
+  <div v-if="state.loaded" class="library">
+    <app-button v-for="playlist in state.playlists" :key="playlist.id" dark class="library__item" :style="{backgroundImage: `url(${playlist.image})`}" :to="`/categories/${categoryId}/playlists/${playlist.id}`" :title="playlist.name" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue'
+import { computed, inject, reactive } from 'vue'
 import { SPOTIFY_CLIENT } from '../injects'
 import { Category, Playlist } from '../services/spotify/types'
 
@@ -15,9 +15,17 @@ const props = defineProps<{
   categoryId: string
 }>()
 
-let loaded = false
-let category: Category | null = null
-let playlists: Playlist[] = []
+interface State {
+  loaded: boolean
+  category: Category | null
+  playlists: Playlist[]
+}
+
+const state = reactive<State>({
+  loaded: false,
+  category: null,
+  playlists: []
+})
 
 // eslint-disable-next-line no-unused-vars
 const breadcrumbs = computed(() => {
@@ -27,7 +35,7 @@ const breadcrumbs = computed(() => {
       to: '/'
     },
     {
-      text: category?.name,
+      text: state.category?.name,
       to: `/categories/${props.categoryId}`
     }
   ]
@@ -35,13 +43,13 @@ const breadcrumbs = computed(() => {
 
 await Promise.all([
   (async () => {
-    category = await spotifyClient.getCategory(props.categoryId)
+    state.category = await spotifyClient.getCategory(props.categoryId)
   })(),
   (async () => {
-    playlists = await spotifyClient.getCategoryPlaylists(props.categoryId)
+    state.playlists = await spotifyClient.getCategoryPlaylists(props.categoryId)
   })()
 ])
-loaded = true
+state.loaded = true
 </script>
 
 <style lang="sass" scoped>

@@ -1,9 +1,9 @@
 <template>
-  <div v-if="loaded" class="blindtest">
-    <div class="blindtest__header" :class="{'blindtest__header--row': started}">
-      <img :src="playlist?.image" alt="Playlist logo" class="blindtest__image">
+  <div v-if="state.loaded" class="blindtest">
+    <div class="blindtest__header" :class="{'blindtest__header--row': state.started}">
+      <img :src="state.playlist?.image" alt="Playlist logo" class="blindtest__image">
       <h1 class="blindtest__title">
-        {{ playlist?.name }}
+        {{ state.playlist?.name }}
       </h1>
     </div>
 
@@ -11,22 +11,22 @@
       This playlist does not contain any song!
     </div>
 
-    <app-button v-if="!started" class="blindtest__start-btn" :disabled="!canStartBlindTest" @click="startBlindTest()">
+    <app-button v-if="!state.started" class="blindtest__start-btn" :disabled="!canStartBlindTest" @click="startBlindTest()">
       Start the blind test!
     </app-button>
 
     <template v-else>
       <transition-group name="fade">
-        <div v-for="(track, index) in pastTracks" :key="index" class="blindtest__track">
+        <div v-for="(track, index) in state.pastTracks" :key="index" class="blindtest__track">
           {{ track.artists[0] }} : {{ track.name }}
-          <app-button v-if="finished" tile title="Play this track" @click="playTrack(track.id)">
+          <app-button v-if="state.finished" tile title="Play this track" @click="playTrack(track.id)">
             <icon-mdi-play-circle />
           </app-button>
         </div>
       </transition-group>
-      <app-progress v-if="!finished" :duration="progressDuration" class="blindtest__progress" />
+      <app-progress v-if="!state.finished" :duration="state.progressDuration" class="blindtest__progress" />
 
-      <app-button v-if="finished" class="mt-3" @click="startBlindTest()">
+      <app-button v-if="state.finished" class="mt-3" @click="startBlindTest()">
         Start a new blindtest
       </app-button>
     </template>
@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onUnmounted } from 'vue'
+import { computed, inject, onUnmounted, reactive } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { SETTINGS_SERVICE, SPOTIFY_CLIENT } from '../injects'
 import { Category, Playlist, Track } from '../services/spotify/types'
@@ -48,15 +48,28 @@ const props = defineProps<{
   playlistId: string
 }>()
 
-let loaded = false
-let playlist: Playlist | null = null
-let category: Category | null = null
+interface State {
+  loaded: boolean
+  playlist: Playlist | null
+  category: Category | null
+  started: boolean
+  pendingTracks: Track[]
+  pastTracks: Track[]
+  progressDuration: number
+  finished: boolean
+}
 
-let started = false
-let pendingTracks: Track[] = []
-let pastTracks: Track[] = []
-let progressDuration = -1
-let finished = false
+const state = reactive<State>({
+  loaded: false,
+  playlist: null,
+  category: null,
+  started: false,
+  pendingTracks: [],
+  pastTracks: [],
+  progressDuration: -1,
+  finished: false
+})
+
 let stepTimeout = -1
 
 // eslint-disable-next-line no-unused-vars
@@ -67,20 +80,20 @@ const breadcrumbs = computed(() => {
       to: '/'
     }
   ]
-  if (category && playlist) {
+  if (state.category && state.playlist) {
     breadcrumbs.push(
       {
-        text: category.name,
+        text: state.category.name,
         to: `/categories/${props.categoryId}`
       },
       {
-        text: playlist.name,
+        text: state.playlist.name,
         to: `/categories/${props.categoryId}/playlists/${props.playlistId}`
       }
     )
-  } else if (playlist) {
+  } else if (state.playlist) {
     breadcrumbs.push({
-      text: playlist.name,
+      text: state.playlist.name,
       to: `/playlists/${props.playlistId}`
     })
   }
@@ -94,14 +107,14 @@ const pauseDuration = computed(() => {
   return settings.settings.pauseDuration * 1000
 })
 const emptyPlaylist = computed(() => {
-  return playlist?.tracks?.length === 0
+  return state.playlist?.tracks?.length === 0
 })
 const canStartBlindTest = computed(() => {
-  return spotifyClient.deviceReady.value && !emptyPlaylist.value
+  return spotifyClient.deviceReady && !emptyPlaylist.value
 })
 
 onBeforeRouteLeave(() => {
-  if (started) {
+  if (state.started) {
     const answer = window.confirm('Do you really want to leave?')
     if (!answer) {
       return false
@@ -110,7 +123,7 @@ onBeforeRouteLeave(() => {
 })
 
 onUnmounted(() => {
-  if (started && !finished) {
+  if (state.started && !state.finished) {
     clearTimeout(stepTimeout)
     spotifyClient.pause().catch(() => {})
     window.removeEventListener('beforeunload', onBeforeLeaving)
@@ -121,39 +134,40 @@ await Promise.all([
   spotifyClient.checkDevices(),
   (async () => {
     if (props.categoryId) {
-      category = await spotifyClient.getCategory(props.categoryId)
+      state.category = await spotifyClient.getCategory(props.categoryId)
     }
   })(),
   (async () => {
-    playlist = await spotifyClient.getPlaylist(props.playlistId)
+    state.playlist = await spotifyClient.getPlaylist(props.playlistId)
   })()
 ])
-loaded = true
+state.loaded = true
 
 async function startBlindTest () {
-  started = true
-  finished = false
-  pendingTracks = shuffleArray(playlist!.tracks!).slice(0, settings.settings.numberOfTracks)
-  pastTracks = []
+  state.started = true
+  state.finished = false
+  state.pendingTracks = shuffleArray(state.playlist!.tracks!).slice(0, settings.settings.numberOfTracks)
+  state.pastTracks = []
   window.addEventListener('beforeunload', onBeforeLeaving)
   await stepTrack()
 }
 
 async function stepTrack () {
-  const [track] = pendingTracks.splice(0, 1)
+  const [track] = state.pendingTracks.splice(0, 1)
   const startPosition = Math.floor(Math.random() * (track.duration - listenDuration.value))
   await spotifyClient.play(track.id, startPosition)
-  progressDuration = listenDuration.value
-  stepTimeout = window.setTimeout(stepPause, progressDuration, track)
+  state.progressDuration = listenDuration.value
+  stepTimeout = window.setTimeout(stepPause, state.progressDuration, track)
+  console.log('STARTSTEP')
 }
 async function stepPause (track: Track) {
   await spotifyClient.pause()
-  pastTracks.push(track)
-  if (pendingTracks.length > 0) {
-    progressDuration = pauseDuration.value
-    stepTimeout = window.setTimeout(stepTrack, progressDuration)
+  state.pastTracks.push(track)
+  if (state.pendingTracks.length > 0) {
+    state.progressDuration = pauseDuration.value
+    stepTimeout = window.setTimeout(stepTrack, state.progressDuration)
   } else {
-    finished = true
+    state.finished = true
     window.removeEventListener('beforeunload', onBeforeLeaving)
   }
 }

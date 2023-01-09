@@ -2,45 +2,34 @@
   <progress max="100" :value="progress" />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { onBeforeUnmount, ref, watchEffect } from 'vue'
 
-export default defineComponent({
-  props: {
-    duration: {
-      type: Number,
-      required: true
-    }
-  },
-  data () {
-    return {
-      frameScheduler: -1,
-      progress: 0
-    }
-  },
-  watch: {
-    duration: {
-      handler (value) {
-        cancelAnimationFrame(this.frameScheduler)
-        if (value > 0) {
-          this.frameScheduler = requestAnimationFrame(this.step.bind(this, Date.now()))
-        } else {
-          this.progress = 0
-        }
-      },
-      immediate: true
-    }
-  },
-  beforeUnmount () {
-    cancelAnimationFrame(this.frameScheduler)
-  },
-  methods: {
-    step (startTime: number) {
-      this.progress = (Date.now() - startTime) * 100 / this.duration
-      if (this.progress < 100) {
-        this.frameScheduler = requestAnimationFrame(this.step.bind(this, startTime))
-      }
-    }
+const props = defineProps<{
+  duration: number
+}>()
+
+let frameScheduler = -1
+const progress = ref(0)
+
+watchEffect(() => {
+  cancelAnimationFrame(frameScheduler)
+  if (props.duration > 0) {
+    frameScheduler = requestAnimationFrame(createStep(Date.now()))
+  } else {
+    progress.value = 0
   }
 })
+onBeforeUnmount(() => {
+  cancelAnimationFrame(frameScheduler)
+})
+
+function createStep (startTime: number) {
+  return function step () {
+    progress.value = (Date.now() - startTime) * 100 / props.duration
+    if (progress.value < 100) {
+      frameScheduler = requestAnimationFrame(step.bind(null, startTime))
+    }
+  }
+}
 </script>
