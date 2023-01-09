@@ -93,6 +93,10 @@ export default defineComponent({
     color: white
 
   &__content
+    display: inline-flex
+    justify-content: center
+    align-items: center
+    pointer-events: none
     // place the overlay below the content so that only the background gets darker
     z-index: 1
 
