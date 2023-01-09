@@ -1,6 +1,8 @@
 <template>
   <button :class="classes" :disabled="disable || loading" @click="handleClick">
-    <slot />
+    <div class="button__content">
+      <slot />
+    </div>
     <div class="button__overlay" />
   </button>
 </template>
@@ -74,6 +76,7 @@ export default defineComponent({
   padding: 8px
   border: none
   background-color: transparent
+  color: inherit
   font-weight: bold
   transition: .3s
   min-width: 48px
@@ -89,6 +92,10 @@ export default defineComponent({
   &--dark
     color: white
 
+  &__content
+    // place the overlay below the content so that only the background gets darker
+    z-index: 1
+
   &__overlay
     position: absolute
     top: 0
@@ -100,4 +107,6 @@ export default defineComponent({
     &:hover
       background-color: #e7e7e755
 
+  &:active
+      background-color: darken(#e7e7e755, 20%)
 </style>
