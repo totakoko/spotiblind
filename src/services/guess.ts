@@ -1,4 +1,5 @@
 import { distance } from 'fastest-levenshtein'
+import { reactive } from 'vue'
 import { normalize } from '../util/util'
 import { Track } from './spotify/types'
 
@@ -13,11 +14,19 @@ export interface ArtistGuessResult {
   index: number
 }
 
+export interface TrackGuesserState {
+  artist: boolean
+  track: boolean
+}
+
 export class TrackGuesser {
   private readonly name: string
   private readonly artists: string[]
 
-  // TODO mettre une ref publique pour contenir le statut
+  public state = reactive<TrackGuesserState>({
+    artist: false,
+    track: false
+  })
 
   constructor (track: Track) {
     this.name = normalize(cleanTrackName(track.name))
@@ -28,19 +37,29 @@ export class TrackGuesser {
     const results: GuessResult[] = []
     const distanceThreshold = getDistanceThreshold(trackOrArtist)
     if (distance(trackOrArtist, this.name) <= distanceThreshold) {
+      this.state.track = true
       results.push({
         type: 'name'
       })
     }
 
-    for (const [index, artist] of this.artists.entries()) {
-      if (distance(trackOrArtist, artist) <= distanceThreshold) {
-        results.push({
-          type: 'artist',
-          index
-        })
-      }
+    // only guess the first artist for now
+    if (distance(trackOrArtist, this.artists[0]) <= distanceThreshold) {
+      this.state.artist = true
+      results.push({
+        type: 'artist',
+        index: 0
+      })
     }
+    // for (const [index, artist] of this.artists.entries()) {
+    //   if (distance(trackOrArtist, artist) <= distanceThreshold) {
+    //     this.state.artist = true
+    //     results.push({
+    //       type: 'artist',
+    //       index
+    //     })
+    //   }
+    // }
     return results
   }
 }
@@ -50,9 +69,11 @@ function getDistanceThreshold (guess: string): number {
   return Math.floor(guess.length / 10)
 }
 
+// remove junk from the track name (featurings, radio edit...)
 export function cleanTrackName (trackName: string): string {
   return trackName
-    .replace(/ \(feat\. .*\)$/i, '')
+    .replace(/ \(feat\. .*\).*$/i, '')
     .replace(/ - Radio (edit|version).*$/i, '')
-    .replace(/ - Remastered.*/i, '')
+    .replace(/ - Remastered.*$/i, '')
+    .replace(/ - Compilation.*$/i, '')
 }

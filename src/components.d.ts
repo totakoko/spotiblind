@@ -8,6 +8,7 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AppButton: typeof import('./components/AppButton.vue')['default']
+    AppGuessInput: typeof import('./components/AppGuessInput.vue')['default']
     AppInput: typeof import('./components/AppInput.vue')['default']
     AppProgress: typeof import('./components/AppProgress.vue')['default']
     AppPwaReload: typeof import('./components/AppPwaReload.vue')['default']

@@ -25,6 +25,7 @@
         </div>
       </transition-group>
       <app-progress v-if="!state.finished" :duration="state.progressDuration" class="blindtest__progress" />
+      <app-guess-input :track="state.currentTrack" />
 
       <app-button v-if="state.finished" class="mt-3" @click="startBlindTest()">
         Start a new blindtest
@@ -53,6 +54,7 @@ interface State {
   playlist: Playlist | null
   category: Category | null
   started: boolean
+  currentTrack: Track | null
   pendingTracks: Track[]
   pastTracks: Track[]
   progressDuration: number
@@ -64,6 +66,7 @@ const state = reactive<State>({
   playlist: null,
   category: null,
   started: false,
+  currentTrack: null,
   pendingTracks: [],
   pastTracks: [],
   progressDuration: -1,
@@ -154,6 +157,7 @@ async function startBlindTest () {
 
 async function stepTrack () {
   const [track] = state.pendingTracks.splice(0, 1)
+  state.currentTrack = track
   const startPosition = Math.floor(Math.random() * (track.duration - listenDuration.value))
   await spotifyClient.play(track.id, startPosition)
   state.progressDuration = listenDuration.value
@@ -161,6 +165,7 @@ async function stepTrack () {
 }
 async function stepPause (track: Track) {
   await spotifyClient.pause()
+  state.currentTrack = null
   state.pastTracks.push(track)
   if (state.pendingTracks.length > 0) {
     state.progressDuration = pauseDuration.value
