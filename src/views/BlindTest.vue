@@ -113,7 +113,7 @@ const emptyPlaylist = computed(() => {
   return state.playlist?.tracks?.length === 0
 })
 const canStartBlindTest = computed(() => {
-  return spotifyClient.deviceReady && !emptyPlaylist.value
+  return spotifyClient.deviceReady.value && !emptyPlaylist.value
 })
 
 onBeforeRouteLeave(() => {
