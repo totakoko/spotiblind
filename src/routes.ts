@@ -7,10 +7,11 @@ import Settings from './views/Settings.vue'
 import About from './views/About.vue'
 import NotFound from './views/NotFound.vue'
 import Debug from './views/Debug.vue'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 const devMode = import.meta.env.DEV
 
-export const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'Login',
@@ -69,3 +70,8 @@ export const routes = [
     component: NotFound
   }
 ]
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
