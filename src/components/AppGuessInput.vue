@@ -1,7 +1,7 @@
 <template>
   <div class="pa-3">
     <div>
-      <input v-model="guess" type="text" placeholder="artist / track name" class="input" :class="inputClasses" @keydown.enter="emitGuess()">
+      <input ref="inputElement" v-model="guess" type="text" placeholder="artist / track name" class="input" :class="inputClasses" @keydown.enter="emitGuess()">
       <app-button :disabled="guess.length === 0 || track === null" @click="emitGuess()">
         OK
       </app-button>
@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 import { TrackGuesser } from '../services/guess'
 import { Track } from '../services/spotify/types'
 
@@ -57,6 +57,10 @@ function emitGuess () {
   guess.value = ''
 }
 
+const inputElement = ref<HTMLElement | null>(null)
+onMounted(() => {
+  inputElement.value?.focus()
+})
 </script>
 
 <style lang="sass" scoped>
