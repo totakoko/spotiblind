@@ -59,7 +59,7 @@ state.loaded = true
 </script>
 
 <style lang="sass" scoped>
-@use '../common'
+@use '../styles/library'
 
 .library__item
   font-size: 1.2em !important

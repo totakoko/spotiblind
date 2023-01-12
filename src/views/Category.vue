@@ -53,6 +53,6 @@ state.loaded = true
 </script>
 
 <style lang="sass" scoped>
-@use '../common'
+@use '../styles/library'
 
 </style>
