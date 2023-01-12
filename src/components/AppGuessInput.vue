@@ -1,7 +1,7 @@
 <template>
   <div class="pa-3">
     <div>
-      <input v-model="guess" type="text" placeholder="artist / track name" class="input" :class="{ 'input--error': submitError }" @keydown.enter="emitGuess()">
+      <input v-model="guess" type="text" placeholder="artist / track name" class="input" :class="inputClasses" @keydown.enter="emitGuess()">
       <app-button :disabled="guess.length === 0 || track === null" @click="emitGuess()">
         OK
       </app-button>
@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { TrackGuesser } from '../services/guess'
 import { Track } from '../services/spotify/types'
 
@@ -34,7 +34,13 @@ watchEffect(() => {
   }
 })
 
+const inputClasses = computed(() => ({
+  'input--error': submitError.value,
+  'input--success': submitSuccess.value
+}))
+
 const submitError = ref(false)
+const submitSuccess = ref(false)
 const guess = ref('')
 
 function emitGuess () {
@@ -42,18 +48,22 @@ function emitGuess () {
     return
   }
   const results = trackGuesser!.guess(guess.value)
-  if (results.length === 0) {
-    submitError.value = true
-    window.setTimeout(() => {
-      submitError.value = false
-    }, 600)
-  }
+
+  const ref = results.length > 0 ? submitSuccess : submitError
+  ref.value = true
+  window.setTimeout(() => {
+    ref.value = false
+  }, 600)
   guess.value = ''
 }
 
 </script>
 
 <style lang="sass" scoped>
+
+$successBackgroundColor : #19d11b82
+$successBorderColor : darken($successBackgroundColor, 40%)
+
 .input
   padding: 8px
   border-style: solid
@@ -70,13 +80,20 @@ function emitGuess () {
     background-color: #d7d7d755
 
   &--error
-    animation-name: shakeError
+    animation-name: shake-error
     animation-fill-mode: forwards
     animation-duration: .6s
     animation-timing-function: ease-in-out
     border-color: red !important
     outline-color: red !important
+    background-color: lighten(red, 40%) !important
     color: red !important
+
+  &--success
+    border-color: $successBorderColor !important
+    outline-color: $successBorderColor !important
+    background-color: $successBackgroundColor !important
+    color: $successBorderColor !important
 
 @keyframes shake-error
   0%
