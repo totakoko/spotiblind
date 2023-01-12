@@ -1,4 +1,4 @@
-import 'modern-css-reset'
+import './styles/reset.sass'
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
