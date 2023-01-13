@@ -323,7 +323,10 @@ export class SpotifyClient {
       headers: this.getAuthHeaders(),
       method: 'PUT'
     })
-    this.ensureValidResponse(res)
+    // 403 means the device is already paused
+    if (res.status !== 403) {
+      this.ensureValidResponse(res)
+    }
   }
 
   async fetchAllItems (url: string, collectionKey: string, limit: number): Promise<any> {

@@ -19,6 +19,20 @@
       <label for="pause">Pause between tracks (in seconds)</label>
       <app-input id="pause" v-model.number="settingsService.settings.pauseDuration" type="number" min="0" max="60" />
     </div>
+    <div class="form-field">
+      <label for="trackMode">Track Mode</label>
+      <select id="trackMode" v-model="settingsService.settings.trackMode">
+        <option value="start">
+          Start
+        </option>
+        <option value="middle">
+          Middle
+        </option>
+        <option value="end">
+          End
+        </option>
+      </select>
+    </div>
   </div>
 </template>
 

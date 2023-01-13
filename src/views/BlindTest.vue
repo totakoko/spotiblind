@@ -41,7 +41,7 @@ import { SETTINGS_SERVICE, SPOTIFY_CLIENT } from '../injects'
 import { Category, Playlist, Track } from '../services/spotify/types'
 import { shuffleArray } from '../util/util'
 
-const settings = inject(SETTINGS_SERVICE)!
+const settingsService = inject(SETTINGS_SERVICE)!
 const spotifyClient = inject(SPOTIFY_CLIENT)!
 
 const props = defineProps<{
@@ -104,10 +104,10 @@ const breadcrumbs = computed(() => {
 })
 
 const listenDuration = computed(() => {
-  return settings.settings.listenDuration * 1000
+  return settingsService.settings.listenDuration * 1000
 })
 const pauseDuration = computed(() => {
-  return settings.settings.pauseDuration * 1000
+  return settingsService.settings.pauseDuration * 1000
 })
 const emptyPlaylist = computed(() => {
   return state.playlist?.tracks?.length === 0
@@ -149,7 +149,7 @@ state.loaded = true
 async function startBlindTest () {
   state.started = true
   state.finished = false
-  state.pendingTracks = shuffleArray(state.playlist!.tracks!).slice(0, settings.settings.numberOfTracks)
+  state.pendingTracks = shuffleArray(state.playlist!.tracks!).slice(0, settingsService.settings.numberOfTracks)
   state.pastTracks = []
   window.addEventListener('beforeunload', onBeforeLeaving)
   await stepTrack()
@@ -158,8 +158,7 @@ async function startBlindTest () {
 async function stepTrack () {
   const [track] = state.pendingTracks.splice(0, 1)
   state.currentTrack = track
-  const startPosition = Math.floor(Math.random() * (track.duration - listenDuration.value))
-  await spotifyClient.play(track.id, startPosition)
+  await spotifyClient.play(track.id, getTrackStartPosition(track.duration))
   state.progressDuration = listenDuration.value
   stepTimeout = window.setTimeout(stepPause, state.progressDuration, track)
 }
@@ -186,6 +185,17 @@ function onBeforeLeaving (event: BeforeUnloadEvent) {
   event.preventDefault()
   // Chrome requires returnValue to be set
   event.returnValue = ''
+}
+
+function getTrackStartPosition (trackDuration: number): number {
+  switch (settingsService.settings.trackMode) {
+    case 'start':
+      return 0
+    case 'middle':
+      return Math.floor(Math.random() * (trackDuration - listenDuration.value))
+    case 'end':
+      return Math.max(trackDuration - listenDuration.value, 0)
+  }
 }
 </script>
 
