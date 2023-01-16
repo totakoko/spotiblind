@@ -76,3 +76,23 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update production
+        uses: addnab/docker-run-action@v3
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_FINGERPRINT: ${{ secrets.SSH_FINGERPRINT }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        with:
+          image: totakoko/compose-deploy:latest
+          options: -e SSH_HOST -e SSH_PORT -e SSH_USER -e SSH_FINGERPRINT -e SSH_PRIVATE_KEY
+          run: |
+            compose-deploy update-module spotiblind ui
