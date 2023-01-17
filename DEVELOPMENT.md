@@ -34,3 +34,15 @@ No tests yet!
 ```sh
 npm run build
 ```
+
+## GitHub Actions
+
+- Branch *main* is protected against force-push.
+- Secrets were defined in [Actions secrets](https://github.com/totakoko/spotiblind/settings/secrets/actions):
+  - DOCKERHUB_USERNAME
+  - DOCKERHUB_TOKEN
+  - SSH_HOST
+  - SSH_PORT
+  - SSH_USER
+  - SSH_FINGERPRINT
+  - SSH_PRIVATE_KEY
