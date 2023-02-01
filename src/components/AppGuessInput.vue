@@ -1,7 +1,7 @@
 <template>
   <div class="pa-3">
     <div>
-      <input ref="inputElement" v-model="guess" type="text" placeholder="artist / track name" class="input" :class="inputClasses" @keydown.enter="emitGuess()">
+      <input ref="inputElement" v-model="guess" type="text" autocomplete="off" placeholder="artist / track name" class="input" :class="inputClasses" @keydown.enter="emitGuess()">
       <app-button :disabled="guess.length === 0 || track === null" @click="emitGuess()">
         OK
       </app-button>
