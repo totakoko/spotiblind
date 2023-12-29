@@ -1,3 +1,47 @@
+<script lang="ts" setup>
+const props = defineProps({
+  tag: {
+    type: String,
+    default: 'button',
+  },
+  tile: {
+    type: Boolean,
+    default: false,
+  },
+  to: {
+    type: String,
+    default: '',
+  },
+  disable: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const router = useRouter()
+
+const classes = computed(() => {
+  const classes = ['button']
+  if (props.tile) {
+    classes.push('button--tile')
+  }
+  return classes
+})
+
+const loading = ref(false)
+
+async function handleClick() {
+  if (props.to) {
+    loading.value = true
+    try {
+      await router.push(props.to)
+    } finally {
+      loading.value = false
+    }
+  }
+}
+</script>
+
 <template>
   <button :class="classes" :disabled="disable || loading" @click="handleClick">
     <div class="button__content">
@@ -7,67 +51,6 @@
   </button>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  props: {
-    tag: {
-      type: String,
-      default: 'button'
-    },
-    tile: {
-      type: Boolean,
-      default: false
-    },
-    dark: {
-      type: Boolean,
-      default: false
-    },
-    to: {
-      type: String,
-      default: ''
-    },
-    disable: {
-      type: Boolean,
-      default: false
-    }
-  },
-  emits: ['click'],
-  data () {
-    return {
-      loading: false
-    }
-  },
-  computed: {
-    classes () {
-      const classes: string[] = ['button']
-      if (this.dark) {
-        classes.push('button--dark')
-      }
-      if (this.tile) {
-        classes.push('button--tile')
-      }
-      return classes
-    }
-  },
-  methods: {
-    async handleClick () {
-      if (this.to) {
-        this.loading = true
-        try {
-          await this.$router.push(this.to)
-        } finally {
-          this.loading = false
-        }
-      } else {
-        this.$emit('click')
-      }
-    }
-  }
-})
-</script>
-
 <style lang="sass" scoped>
 .button
   display: inline-flex
@@ -76,7 +59,6 @@ export default defineComponent({
   padding: 8px
   border: none
   background-color: transparent
-  color: inherit
   font-weight: bold
   transition: .3s
   min-width: 48px
@@ -88,9 +70,6 @@ export default defineComponent({
 
   &:not(.button--tile,[disabled])
     box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%)
-
-  &--dark
-    color: white
 
   &__content
     display: inline-flex

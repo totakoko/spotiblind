@@ -1,43 +1,23 @@
-<template>
-  <input :type="type" class="input" :value="modelValue" @input="triggerUpdate($event)">
-</template>
-
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  props: {
-    type: {
-      type: String,
-      default: 'text'
-    },
-    modelValue: { // eslint-disable-line vue/require-prop-types
-      default: undefined
-    }
+<script lang="ts" setup>
+const props = defineProps({
+  type: {
+    type: String as () => 'text' | 'number',
+    default: 'text',
   },
-  emits: ['update:modelValue'],
-  methods: {
-    triggerUpdate (event: Event): void {
-      this.$emit('update:modelValue', (event.target as HTMLInputElement)!.value)
-    }
-  }
+  modelValue: {
+    type: [String, Number],
+    required: true,
+  },
 })
+
+const emit = defineEmits<{
+  'update:modelValue': [value: typeof props.modelValue]
+}>()
 </script>
 
-<style lang="sass" scoped>
-.input
-  line-height: 2em
-  height: 1.5em
-  padding: 8px
-  padding-right: 0
-  border-style: solid
-  transition: background-color .3s
-
-  &:invalid
-    outline-color: red
-    border-color: red
-    color: red
-
-  &:hover
-    background-color: #d7d7d755
-</style>
+<template>
+  <input
+    border-2 border-gray rounded px-2 line-height-2em transition-300 invalid:border-red hover:bg-gray-200 invalid:c-red invalid:outline-red
+    :type="props.type" :value="props.modelValue" @input="emit('update:modelValue', ($event.target as HTMLInputElement)!.value)"
+  >
+</template>

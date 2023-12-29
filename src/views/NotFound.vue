@@ -1,24 +1,13 @@
 <template>
-  <div class="wrapper">
-    ¯\_(ツ)_/¯
-    <br>
-    Page not found
-    <app-button class="home-link" title="Go to home page" to="/">
-      Home
-    </app-button>
+  <div grid h-full place-items-center>
+    <div text-center>
+      <div i-mdi-emoticon-dead-outline mx-auto font-size-16em />
+      <div mt-10 text-4xl>
+        Page not found
+      </div>
+      <AppButton mt-20 title="Go to home page" to="/">
+        Home
+      </AppButton>
+    </div>
   </div>
 </template>
-
-<style lang="sass" scoped>
-.wrapper
-  display: flex
-  flex-direction: column
-  justify-content: center
-  align-items: center
-  height: 100vh
-  text-align: center
-  font-size: 3em
-
-.home-link
-  margin-top: 3em
-</style>

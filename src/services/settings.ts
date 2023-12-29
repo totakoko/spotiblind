@@ -5,34 +5,34 @@ const LOCAL_STORAGE_SETTINGS_KEY = 'spotiblind:settings'
 
 type TrackMode = 'start' | 'middle' | 'end'
 
-export interface Settings {
+interface Settings {
   listenDuration: number
   numberOfTracks: number
   pauseDuration: number
   trackMode: TrackMode
 }
 
-export const defaultSettings: Settings = {
+const defaultSettings: Settings = {
   listenDuration: 20,
   numberOfTracks: 10,
   pauseDuration: 5,
-  trackMode: 'middle'
+  trackMode: 'middle',
 }
 
 export class SettingsService {
   settings: Settings = defaultSettings
 
-  constructor () {
+  constructor() {
     const settings = localStorage.getItem(LOCAL_STORAGE_SETTINGS_KEY)
     if (settings !== null) {
       try {
         this.settings = Object.assign(
           {},
           defaultSettings,
-          JSON.parse(settings)
+          JSON.parse(settings),
         )
       } catch (e) {
-        console.log('could not parse settings', e, 'settings=', settings)
+        console.error('could not parse settings', e, 'settings=', settings)
       }
     }
     this.settings = reactive(this.settings)
@@ -42,11 +42,11 @@ export class SettingsService {
     }, 500))
   }
 
-  save (): void {
+  save(): void {
     localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(this.settings))
   }
 
-  reset (): void {
+  reset(): void {
     Object.assign(this.settings, defaultSettings)
   }
 }

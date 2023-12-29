@@ -1,8 +1,7 @@
 <template>
   <Suspense>
-    <router-view />
+    <RouterView />
   </Suspense>
-  <app-pwa-reload />
 </template>
 
 <style lang="sass">
@@ -16,8 +15,4 @@
   display: flex
   flex-direction: column
   background-color: #f5f5f5
-
-.u-spacer
-  flex-grow: 1
-
 </style>

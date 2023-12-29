@@ -1,8 +1,8 @@
-export async function wait (ms: number): Promise<void> {
+export async function wait(ms: number): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, ms))
 }
 
-export function shuffleArray<T> (array: T[]): T[] {
+export function shuffleArray<T>(array: T[]): T[] {
   const newArr = []
   const source = array.slice()
   while (source.length > 0) {
@@ -13,6 +13,6 @@ export function shuffleArray<T> (array: T[]): T[] {
   return newArr
 }
 
-export function normalize (str: string | null | undefined): string {
-  return str == null ? '' : str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+export function normalize(str: string | null | undefined): string {
+  return str == null ? '' : str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036F]/g, '')
 }

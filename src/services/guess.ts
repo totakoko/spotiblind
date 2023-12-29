@@ -1,7 +1,7 @@
 import { distance } from 'fastest-levenshtein'
 import { reactive } from 'vue'
-import { normalize } from '../util/util'
-import { Track } from './spotify/types'
+import type { Track } from './spotify/types'
+import { normalize } from '@/util/util'
 
 export type GuessResult = NameGuessResult | ArtistGuessResult
 
@@ -25,21 +25,21 @@ export class TrackGuesser {
 
   public state = reactive<TrackGuesserState>({
     artist: false,
-    track: false
+    track: false,
   })
 
-  constructor (track: Track) {
+  constructor(track: Track) {
     this.name = normalize(cleanTrackName(track.name))
     this.artists = track.artists.map(artist => normalize(artist))
   }
 
-  guess (trackOrArtist: string): GuessResult[] {
+  guess(trackOrArtist: string): GuessResult[] {
     const results: GuessResult[] = []
     const distanceThreshold = getDistanceThreshold(trackOrArtist)
     if (distance(trackOrArtist, this.name) <= distanceThreshold) {
       this.state.track = true
       results.push({
-        type: 'name'
+        type: 'name',
       })
     }
 
@@ -48,7 +48,7 @@ export class TrackGuesser {
       this.state.artist = true
       results.push({
         type: 'artist',
-        index: 0
+        index: 0,
       })
     }
     // for (const [index, artist] of this.artists.entries()) {
@@ -64,13 +64,13 @@ export class TrackGuesser {
   }
 }
 
-// allow 1 error every 10 characters
-function getDistanceThreshold (guess: string): number {
-  return Math.floor(guess.length / 10)
+// allow 1 + 1 error every 10 characters
+function getDistanceThreshold(guess: string): number {
+  return Math.floor(guess.length / 10) + 1
 }
 
 // remove junk from the track name (featurings, radio edit...)
-export function cleanTrackName (trackName: string): string {
+export function cleanTrackName(trackName: string): string {
   return trackName
     .replace(/ \(feat\. .*\).*$/i, '')
     .replace(/ - Radio (edit|version).*$/i, '')
