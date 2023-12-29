@@ -36,10 +36,12 @@ export class SettingsService {
       }
     }
     this.settings = reactive(this.settings)
-
-    watch(this.settings, debounce(() => {
+    const debouncedSave = debounce(() => {
       this.save()
-    }, 500))
+    }, 500)
+    watch(this.settings, () => {
+      debouncedSave()
+    })
   }
 
   save(): void {
