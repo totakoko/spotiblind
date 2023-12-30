@@ -7,4 +7,4 @@ COPY docker/init.sh /init.sh
 COPY dist/. /usr/share/nginx/html/
 
 EXPOSE 5000
-CMD ["/init.sh"]
+ENTRYPOINT ["/init.sh"]
