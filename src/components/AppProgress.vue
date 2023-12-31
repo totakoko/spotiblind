@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { interpolateColor } from '@/util/color'
-
 export interface ProgressConfig {
   duration: number
   shakeAnimation?: boolean
@@ -13,7 +11,7 @@ const progressValue = ref(100)
 const progressClasses = ref('')
 
 // this variable is used in CSS
-const progressColor = ref('#00ff00')
+const progressColor = ref(`hsl(100deg 50% 50%)`)
 const progressDropShadow = ref(`0rem`)
 
 let frameSchedulerTimeout = -1
@@ -34,7 +32,13 @@ function createStep(startTime: number) {
   return function step() {
     const ratio = (Date.now() - startTime) / props.config.duration
     progressValue.value = 100 - ratio * 100 // the progress is reversed so that we can see the remaining time
-    progressColor.value = interpolateColor('#34ad38', '#cc0a0a', ratio)
+
+    const hueProgressRatio = Math.max(1 + Math.log2(ratio), 0) // slower progression, stays longer in the green (half of the time)
+    const startingHueAngle = 100
+    const endingHueAngle = 0
+    const hueAngle = startingHueAngle - hueProgressRatio * (startingHueAngle - endingHueAngle)
+    progressColor.value = `hsl(${hueAngle}deg ${50 + hueProgressRatio * 50}% 50%)` //
+
     if (props.config.shakeAnimation) {
       progressClasses.value = ratio >= 0.9 ? 'big-horizontal-shaking' : ratio >= 0.7 ? 'small-horizontal-shaking' : ''
       progressDropShadow.value = `${(ratio - 0.6) * 3}rem` // start at .6s from 0 to 1.2rem
