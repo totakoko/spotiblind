@@ -11,14 +11,6 @@ import '@unocss/reset/tailwind.css'
 import 'uno.css'
 
 (async () => {
-  // remove any the old service worker if any
-  await Promise.all(
-    (await navigator.serviceWorker.getRegistrations())
-      .map(async (registration) => {
-        await registration.unregister()
-      }),
-  )
-
   const settings = new SettingsService()
   const spotifyClient = new SpotifyClient(config)
   await spotifyClient.init()

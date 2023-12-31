@@ -7,6 +7,7 @@ import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import UnoCSS from 'unocss/vite'
 import VueMacros from 'unplugin-vue-macros/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   server: {
@@ -21,6 +22,19 @@ export default defineConfig({
     },
   },
   plugins: [
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'SpotiBlind',
+        short_name: 'SpotiBlind',
+        display: 'fullscreen',
+        background_color: '#ffffff',
+        lang: 'en',
+        scope: '/',
+        start_url: '/',
+      },
+      selfDestroying: true, // remove any existing service worker
+    }),
     VueMacros({
       defineOptions: false,
       defineModels: false,
