@@ -67,7 +67,11 @@ function createStep(startTime: number) {
   100%
     transform: translateX(0)
 
-progress::-webkit-progress-value, // chrome
+// regrouping these two rules does not seem to work for Chrome... ¯\_(ツ)_/¯
+progress::-webkit-progress-value // chrome
+  background-color: v-bind(progressColor)
+  filter: drop-shadow(0 0 v-bind(progressDropShadow) v-bind(progressColor))
+
 progress[value]::-moz-progress-bar // firefox
   background-color: v-bind(progressColor)
   filter: drop-shadow(0 0 v-bind(progressDropShadow) v-bind(progressColor))
